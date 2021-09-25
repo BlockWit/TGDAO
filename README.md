@@ -2,10 +2,10 @@
 
 # TGDAO smart contracts
 
-* _Standart_        : [ERC20](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md)
-* _[Name](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md#name)_            : TGDAO
-* _[Ticker](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md#symbol)_          : TGDAO
-* _[Decimals](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md#decimals)_        : 18
+* _Standart_        : [BEP20](https://github.com/binance-chain/BEPs/blob/master/BEP20.md)
+* _[Name](https://github.com/binance-chain/BEPs/blob/master/BEP20.md#5111-name)_            : TGDAO
+* _[Ticker](https://github.com/binance-chain/BEPs/blob/master/BEP20.md#5112-symbol)_          : TGDAO
+* _[Decimals](https://github.com/binance-chain/BEPs/blob/master/BEP20.md#5113-decimals)_        : 18
 * _Emission_        : One-time, 30 000 000 tokens
 * _Fiat dependency_ : No, Changable by owner
 * _Token offers_    : 4
@@ -59,12 +59,12 @@ TGDAO smart-contract
 1. `npx webpack build --config front/webpack.config.js`
 2. Open `front/index.html` in browser.
 
-### Wallets with ERC20 support
+### Wallets with BEP20 support
 1. [MyEtherWallet](https://www.myetherwallet.com)
 2. Parity
 3. Mist/Ethereum wallet
 
-EXODUS does not support ERC20, but provides the ability to export the private key to MyEtherWallet - http://support.exodus.io/article/128-how-do-i-receive-unsupported-erc20-tokens
+EXODUS does not support BEP20, but provides the ability to export the private key to MyEtherWallet - http://support.exodus.io/article/128-how-do-i-receive-unsupported-erc20-tokens
 
 ## Main network configuration
 
@@ -74,22 +74,22 @@ EXODUS does not support ERC20, but provides the ability to export the private ke
 * [Sale](https://etherscan.io)
 
 ### Sale stages
-Base price                          : 25 000 TGDAO per ETH
+Base price                          : 3000 TGDAO per BNB
 
 #### Stage 1 - Funds Round 
-* Bonus                             : 200% (price with bonus - 75 000 TGDAO per ETH)
+* Bonus                             : 200% (price with bonus - 9000 TGDAO per BNB)
 * HardCap                           : 3 500 000 TGDAO
 * Start date                        : 15.10.2021
 * End date                          : 25.10.2021
 
 #### Stage 2 - Public Partners Round
-* Bonus                             : 100% (price with bonus - 50 000 TGDAO per ETH)
+* Bonus                             : 100% (price with bonus - 6000 TGDAO per BNB)
 * HardCap                           : 500 000 TGDAO
 * Start date                        : 25.10.2021
 * End date                          : 03.11.2021
 
 #### Stage 3 - Public Sale Round
-* Bonus                             : 0% (price with bonus - 25 000 TGDAO per ETH)
+* Bonus                             : 0% (price with bonus - 3000 TGDAO per BNB)
 * HardCap                           : 6 000 000 TGDAO
 * Start date                        : 03.11.2021
 * End date                          : 10.11.2021
