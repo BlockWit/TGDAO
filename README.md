@@ -84,7 +84,6 @@ Base price                          : 25 000 TGDAO per ETH
 
 #### Stage 2 - Public Partners Round
 * Bonus                             : 100% (price with bonus - 50 000 TGDAO per ETH)
-* Price                             : 150 000 TGDAO per ETH
 * HardCap                           : 500 000 TGDAO
 * Start date                        : 25.10.2021
 * End date                          : 03.11.2021
