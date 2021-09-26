@@ -23,7 +23,7 @@ TGDAO smart-contract
 ### Token distribution
 1. _Cpmany Reserve_: 2 150 000 (Lock for 6 month - FreezeWallet)
 2. _Launch tean_: 2 250 000 (Unlock 10% monthly after 3 months - FreezeWallet)
-3. _Development team_: 250 000 000 (Unlock 2.5% monthly after 3 months - FreezeWallet)
+3. _Development team_: 2 250 000 (Unlock 2.5% monthly after 3 months - FreezeWallet)
 4. _Liquidity_: 3 000 000
 5. _Farming_: 600 000
 6. _Marketing_ 4 500 000 (lock for 6 month)
