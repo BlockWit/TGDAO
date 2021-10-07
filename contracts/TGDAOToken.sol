@@ -5,8 +5,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "./RecoverableFunds.sol";
 import "./interfaces/ICallbackContract.sol";
+import "./RecoverableFunds.sol";
 import "./WithCallback.sol";
 
 /**
@@ -38,7 +38,7 @@ contract TGDAOToken is ERC20, ERC20Burnable, Pausable, RecoverableFunds, WithCal
         _transferCallback(sender, recipient, amount);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override notPaused(from) {
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
     }
 

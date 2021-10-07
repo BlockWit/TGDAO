@@ -1,12 +1,14 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: UNLICENSED
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "../util/RetrieveTokensFeature.sol";
-import "../token/TGDAOToken.sol";
-import "../wallet/FreezeTokenWallet.sol";
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./CommonSale.sol";
+import "./FreezeTokenWallet.sol";
+import "./RecoverableFunds.sol";
+import "./TGDAOToken.sol";
 
-contract Configurator is RetrieveTokensFeature {
+contract Configurator is RecoverableFunds {
     using SafeMath for uint256;
     using Address for address;
 
@@ -56,7 +58,7 @@ contract Configurator is RetrieveTokensFeature {
     FreezeTokenWallet public freezeWallet;
     CommonSale public commonSale;
 
-    constructor () public {
+    constructor () {
         // create instances
         freezeWallet = new FreezeTokenWallet();
         commonSale = new CommonSale();
@@ -78,9 +80,7 @@ contract Configurator is RetrieveTokensFeature {
         commonSale.setPrice(PRICE);
         commonSale.setWallet(ETH_WALLET_ADDRESS);
         commonSale.addMilestone(STAGE1_START_DATE, STAGE1_END_DATE, STAGE1_BONUS, STAGE1_MIN_INVESTMENT, STAGE1_MAX_INVESTMENT, 0, 0, STAGE1_TOKEN_HARDCAP);
-        commonSale.setMilestoneWithWhitelist(0);
         commonSale.addMilestone(STAGE2_START_DATE, STAGE2_END_DATE, STAGE2_BONUS, STAGE2_MIN_INVESTMENT, STAGE2_MAX_INVESTMENT, 0, 0, STAGE2_TOKEN_HARDCAP);
-        commonSale.setMilestoneWithWhitelist(1);
         commonSale.addMilestone(STAGE3_START_DATE, STAGE3_END_DATE, STAGE3_BONUS, STAGE3_MIN_INVESTMENT, STAGE3_MAX_INVESTMENT, 0, 0, STAGE3_TOKEN_HARDCAP);
 
         freezeWallet.setToken(address(token));

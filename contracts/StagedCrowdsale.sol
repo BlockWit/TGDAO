@@ -1,12 +1,13 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: UNLICENSED
 
-import "@openzeppelin/contracts/GSN/Context.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract StagedCrowdsale is Context, Ownable {
+contract StagedCrowdsale is Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -75,7 +76,7 @@ contract StagedCrowdsale is Context, Ownable {
 
     function currentMilestone() public view returns (uint256) {
         for (uint256 i = 0; i < milestones.length; i++) {
-            if (now >= milestones[i].start && now < milestones[i].end && milestones[i].tokensSold <= milestones[i].hardcapInTokens) {
+            if (block.timestamp >= milestones[i].start && block.timestamp < milestones[i].end && milestones[i].tokensSold <= milestones[i].hardcapInTokens) {
                 return i;
             }
         }

@@ -1,12 +1,13 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: UNLICENSED
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+pragma solidity ^0.8.0;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../util/IERC20Cutted.sol";
-import "../util/RetrieveTokensFeature.sol";
+import "./interfaces/IERC20Cutted.sol";
+import "./RecoverableFunds.sol";
 
 
-contract TokenDistributor is Ownable, RetrieveTokensFeature {
+contract TokenDistributor is Ownable, RecoverableFunds {
 
     IERC20Cutted public token;
 

@@ -1,5 +1,5 @@
 {
-  "name": "TGDAO-token",
+  "name": "tgdao-token",
   "version": "1.0.0",
   "description": "TGDAO smart contracts",
   "scripts": {
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BlockWit/candao-token"
+    "url": "git+https://github.com/BlockWit/TGDAO"
   },
   "author": "BlockWit",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/BlockWit/candao-token/issues"
+    "url": "https://github.com/BlockWit/TGDAO"
   },
-  "homepage": "https://github.com/BlockWit/candao-token#readme",
+  "homepage": "https://github.com/BlockWit/TGDAO#readme",
   "devDependencies": {
     "@metamask/detect-provider": "^1.2.0",
     "@openzeppelin/cli": "^2.8.2",

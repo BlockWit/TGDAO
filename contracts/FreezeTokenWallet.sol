@@ -1,10 +1,12 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: UNLICENSED
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "../util/IERC20Cutted.sol";
-import "../util/RetrieveTokensFeature.sol";
+pragma solidity ^0.8.0;
 
-contract FreezeTokenWallet is RetrieveTokensFeature {
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./interfaces/IERC20Cutted.sol";
+import "./RecoverableFunds.sol";
+
+contract FreezeTokenWallet is RecoverableFunds {
 
   using SafeMath for uint256;
 
@@ -43,13 +45,13 @@ contract FreezeTokenWallet is RetrieveTokensFeature {
   }
 
   function retrieveWalletTokens(address to) public onlyOwner {
-    require(started && now >= startDate);
-    if (now >= startDate + duration) {
+    require(started && block.timestamp >= startDate);
+    if (block.timestamp >= startDate + duration) {
       token.transfer(to, token.balanceOf(address(this)));
     } else {
       uint parts = duration.div(interval);
       uint tokensByPart = startBalance.div(parts);
-      uint timeSinceStart = now.sub(startDate);
+      uint timeSinceStart = block.timestamp.sub(startDate);
       uint pastParts = timeSinceStart.div(interval);
       uint tokensToRetrieveSinceStart = pastParts.mul(tokensByPart);
       uint tokensToRetrieve = tokensToRetrieveSinceStart.sub(retrievedTokens);

@@ -1,11 +1,15 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: UNLICENSED
 
-import "../util/RetrieveTokensFeature.sol";
-import "../util/IERC20Cutted.sol";
+pragma solidity ^0.8.0;
+
+import "./interfaces/IERC20Cutted.sol";
+import "./RecoverableFunds.sol";
 import "./StagedCrowdsale.sol";
 
 
-contract CommonSale is StagedCrowdsale, RetrieveTokensFeature {
+contract CommonSale is Context, StagedCrowdsale, RecoverableFunds {
+
+    using SafeMath for uint256;
 
     IERC20Cutted public token;
     uint256 public price; // amount of tokens per 1 ETH
@@ -92,7 +96,7 @@ contract CommonSale is StagedCrowdsale, RetrieveTokensFeature {
         token.transfer(_msgSender(), tokensWithBonus.mul(100).div(98));
 
         if (change > 0) {
-            _msgSender().transfer(change);
+            payable(_msgSender()).transfer(change);
         }
 
         return tokensWithBonus;
