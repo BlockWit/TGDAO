@@ -21,15 +21,16 @@ TGDAO smart-contract
 3. _Sale_ - Sale contract
 
 ### Token distribution
-1. _Cpmany Reserve_: 2 150 000 (Lock for 6 month - FreezeWallet)
+1. _Cpmany Reserve_: 2 400 000 (Lock for 6 month - FreezeWallet)
 2. _Launch tean_: 2 250 000 (Unlock 10% monthly after 3 months - FreezeWallet)
 3. _Development team_: 2 250 000 (Unlock 2.5% monthly after 3 months - FreezeWallet)
 4. _Liquidity_: 3 000 000
 5. _Farming_: 600 000
 6. _Marketing_ 4 500 000 (lock for 6 month)
-7. _Advisors_ 1 500 000 (Unlock 10% monthly after 3 months - FreezeWallet)
-8. _Seed round_ 3 750 000 (Unlock 10% monthly after 3 months - FreezeWallet)
-9. _Funds round_ 3 500 000 (Unlock 10% monthly after 3 months - FreezeWallet)
+7. _Advisors_ 1 000 000 (Unlock 10% monthly after 3 months - FreezeWallet)
+8. _AirDrop_ 250 000
+9. _Seed round_ 3 750 000 (Unlock 10% monthly after 3 months - FreezeWallet)
+10. _Funds round_ 3 500 000 (Unlock 10% monthly after 3 months - FreezeWallet)
 11. _Public partners round_ 500 000
 12. _Public sale_ 6 000 000
 
