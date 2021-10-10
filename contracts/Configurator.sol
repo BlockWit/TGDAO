@@ -43,13 +43,15 @@ contract Configurator is RecoverableFunds {
         walletOwners[4] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Advisors
         walletOwners[5] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Seed round
 
+        uint32 VESTING_START = 1635984000;
+
         // vesting schedules
-        schedules[0] = VestingSchedule(0,  180 days, 180 days); // Company reserve:    lock for 6 months
-        schedules[1] = VestingSchedule(0,  300 days,  30 days); // Launch team:        unlock 10% monthly after 3 months
-        schedules[2] = VestingSchedule(0, 1200 days,  30 days); // Development team:   unlock 2,5% monthly after 6 months
-        schedules[3] = VestingSchedule(0,  180 days, 180 days); // Marketing:          lock for 6 months
-        schedules[4] = VestingSchedule(0,  300 days,  30 days); // Advisors:           unlock 10% monthly after 6 months
-        schedules[5] = VestingSchedule(0,  150 days,  30 days); // Seed round:         unlock 20% monthly after 6 months
+        schedules[0] = VestingSchedule(VESTING_START,  180 days, 180 days); // Company reserve:    lock for 6 months
+        schedules[1] = VestingSchedule(VESTING_START,  300 days,  30 days); // Launch team:        unlock 10% monthly after 3 months
+        schedules[2] = VestingSchedule(VESTING_START, 1200 days,  30 days); // Development team:   unlock 2,5% monthly after 6 months
+        schedules[3] = VestingSchedule(VESTING_START,  180 days, 180 days); // Marketing:          lock for 6 months
+        schedules[4] = VestingSchedule(VESTING_START,  300 days,  30 days); // Advisors:           unlock 10% monthly after 6 months
+        schedules[5] = VestingSchedule(VESTING_START,  150 days,  30 days); // Seed round:         unlock 20% monthly after 6 months
 
         // supplies
         supplies[0] =  3_000_000 ether; // Liquidity
@@ -74,14 +76,14 @@ contract Configurator is RecoverableFunds {
         // create sale
         sale = new CommonSale();
         sale.setWallet(ETH_WALLET_ADDRESS);
-        sale.setPrice(21674 ether);
+        sale.setPrice(3395 ether);
         sale.setVestingSchedule(1, 0, 300 days, 30 days);
         // funds round
-        sale.addStage(1631635200, 1632240000, 50,  30000000000000000, 0, 0, 3_500_000 ether, 1);
+        sale.addStage(1634256000, 1635120000, 200, 24540000000000000000, 0, 0, 3_500_000 ether, 1);
         // public partners round
-        sale.addStage(1632240000, 1632844800, 20,  30000000000000000, 0, 0,   500_000 ether, 0);
+        sale.addStage(1635120000, 1635206400,  50, 24540000000000000000, 0, 0,   500_000 ether, 0);
         // public sale round
-        sale.addStage(1632844800, 4788518400, 0,   30000000000000000, 0, 0, 6_000_000 ether, 0);
+        sale.addStage(1635897600, 1635984000,   0, 24540000000000000000, 0, 0, 6_000_000 ether, 0);
 
         accounts[9] = address(sale);
 
