@@ -25,10 +25,10 @@ contract Configurator is RecoverableFunds {
         address         OWNER_ADDRESS      = address(0x0b2cBc8a2D434dc16818B0664Dd81e89fAA9c3AC);
         address payable ETH_WALLET_ADDRESS = payable(0xf83c2172950d2Cc6490F164bb08F2381C2CdEc82);
 
-        address[] memory accounts = new address[](11);
-        address[] memory walletOwners = new address[](7);
-        VestingSchedule[] memory schedules = new VestingSchedule[](7);
-        uint256[] memory supplies = new uint256[](11);
+        address[] memory accounts = new address[](10);
+        address[] memory walletOwners = new address[](6);
+        VestingSchedule[] memory schedules = new VestingSchedule[](6);
+        uint256[] memory supplies = new uint256[](10);
 
         // casual eth accounts
         accounts[0] = 0xe6Df6C96794063F2cC1Dc338908B2a04Ff29eBd4; // Liquidity
@@ -42,29 +42,26 @@ contract Configurator is RecoverableFunds {
         walletOwners[3] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Marketing
         walletOwners[4] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Advisors
         walletOwners[5] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Seed round
-        walletOwners[6] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Funds round
 
         // vesting schedules
-        schedules[0] = VestingSchedule(0, 0, 0); // Company reserve:    lock for 6 months
-        schedules[1] = VestingSchedule(0, 0, 0); // Launch team:        unlock 10% monthly after 3 months
-        schedules[2] = VestingSchedule(0, 0, 0); // Development team:   unlock 2,5% monthly after 6 months
-        schedules[3] = VestingSchedule(0, 0, 0); // Marketing:          lock for 6 months
-        schedules[4] = VestingSchedule(0, 0, 0); // Advisors:           unlock 10% monthly after 6 months
-        schedules[5] = VestingSchedule(0, 0, 0); // Seed round:         unlock 20% monthly after 6 months
-        schedules[6] = VestingSchedule(0, 0, 0); // Funds round:        unlock 10% monthly after 3 months
+        schedules[0] = VestingSchedule(0,  180 days, 180 days); // Company reserve:    lock for 6 months
+        schedules[1] = VestingSchedule(0,  300 days,  30 days); // Launch team:        unlock 10% monthly after 3 months
+        schedules[2] = VestingSchedule(0, 1200 days,  30 days); // Development team:   unlock 2,5% monthly after 6 months
+        schedules[3] = VestingSchedule(0,  180 days, 180 days); // Marketing:          lock for 6 months
+        schedules[4] = VestingSchedule(0,  300 days,  30 days); // Advisors:           unlock 10% monthly after 6 months
+        schedules[5] = VestingSchedule(0,  150 days,  30 days); // Seed round:         unlock 20% monthly after 6 months
 
         // supplies
-        supplies[0]  = 3_000_000 ether; // Liquidity
-        supplies[1]  =   600_000 ether; // Farming
-        supplies[2]  =   250_000 ether; // Airdrop
-        supplies[3]  = 2_400_000 ether; // Company Reserve
-        supplies[4]  = 2_250_000 ether; // Launch team
-        supplies[5]  = 2_250_000 ether; // Development team
-        supplies[6]  = 4_500_000 ether; // Marketing
-        supplies[7]  = 1_000_000 ether; // Advisors
-        supplies[8]  = 3_750_000 ether; // Seed round
-        supplies[9]  = 3_500_000 ether; // Funds round
-        supplies[10] = 6_500_000 ether; // Public partners (500K) + Public sale (6M)
+        supplies[0] =  3_000_000 ether; // Liquidity
+        supplies[1] =    600_000 ether; // Farming
+        supplies[2] =    250_000 ether; // Airdrop
+        supplies[3] =  2_400_000 ether; // Company Reserve
+        supplies[4] =  2_250_000 ether; // Launch team
+        supplies[5] =  2_250_000 ether; // Development team
+        supplies[6] =  4_500_000 ether; // Marketing
+        supplies[7] =  1_000_000 ether; // Advisors
+        supplies[8] =  3_750_000 ether; // Seed round
+        supplies[9] = 10_000_000 ether; // Funds (3.5M) + Public partners (500K) + Public sale (6M)
 
         // create vesting wallets
         for (uint256 i = 0; i < walletOwners.length; i++) {
@@ -78,14 +75,15 @@ contract Configurator is RecoverableFunds {
         sale = new CommonSale();
         sale.setWallet(ETH_WALLET_ADDRESS);
         sale.setPrice(21674 ether);
+        sale.setVestingSchedule(1, 0, 300 days, 30 days);
         // funds round
-        sale.addStage(1631635200, 1632240000, 50,  30000000000000000, 0, 0, 28305000000000000000000000, 1);
+        sale.addStage(1631635200, 1632240000, 50,  30000000000000000, 0, 0, 3_500_000 ether, 1);
         // public partners round
-        sale.addStage(1632240000, 1632844800, 20,  30000000000000000, 0, 0, 28305000000000000000000000, 0);
+        sale.addStage(1632240000, 1632844800, 20,  30000000000000000, 0, 0,   500_000 ether, 0);
         // public sale round
-        sale.addStage(1632844800, 4788518400, 0,   30000000000000000, 0, 0, 28390000000000000000000000, 0);
+        sale.addStage(1632844800, 4788518400, 0,   30000000000000000, 0, 0, 6_000_000 ether, 0);
 
-        accounts[10] = address(sale);
+        accounts[9] = address(sale);
 
         // create token
         require(accounts.length == supplies.length, "Configurator: wrong account array length");
