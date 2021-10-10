@@ -26,8 +26,8 @@ contract Configurator is RecoverableFunds {
         address payable ETH_WALLET_ADDRESS = payable(0xf83c2172950d2Cc6490F164bb08F2381C2CdEc82);
 
         address[] memory accounts = new address[](11);
-        address[] memory walletOwners = new address[](6);
-        VestingSchedule[] memory schedules = new VestingSchedule[](6);
+        address[] memory walletOwners = new address[](7);
+        VestingSchedule[] memory schedules = new VestingSchedule[](7);
         uint256[] memory supplies = new uint256[](11);
 
         // casual eth accounts
