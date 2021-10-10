@@ -132,6 +132,8 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         // update balance and transfer tokens
         Balance storage balance = balances[stageIndex][msg.sender];
         if (stage.vestingSchedule <= 0) {
+            balance.initial = balance.initial.add(tokens);
+            balance.withdrawed = balance.withdrawed.add(tokens);
             token.transfer(msg.sender, tokens);
         } else {
             balance.initial = balance.initial.add(tokens);
