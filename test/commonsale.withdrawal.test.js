@@ -7,7 +7,7 @@ const Token = contract.fromArtifact('TGDAOToken');
 const Sale = contract.fromArtifact('CommonSale');
 
 const [owner, ethWallet, buyer] = accounts;
-const SUPPLY = 100000;
+const SUPPLY = 1000000000;
 const PRICE = 21674;
 
 describe('CommonSale', async function () {
@@ -18,9 +18,9 @@ describe('CommonSale', async function () {
 
   beforeEach(async function () {
     STAGES = [
-      { start: await dateFromNow(1), end: await dateFromNow(8), bonus: 500, minInvestmentLimit: ether('0.03'), hardcap: ether('40000'), schedule: 0 },
-      { start: await dateFromNow(9), end: await dateFromNow(11), bonus: 0, minInvestmentLimit: ether('0.03'), hardcap: ether('60000'), schedule: 1},
-      { start: await dateFromNow(11), end: await dateFromNow(13), bonus: 250, minInvestmentLimit: ether('0.03'), hardcap: ether('5000'), schedule: 2 }
+      { start: await dateFromNow(1), end: await dateFromNow(8), bonus: 500, minInvestmentLimit: ether('0.03'), hardcap: ether('40000000'), schedule: 0 },
+      { start: await dateFromNow(9), end: await dateFromNow(11), bonus: 0, minInvestmentLimit: ether('0.03'), hardcap: ether('60000000'), schedule: 1 },
+      { start: await dateFromNow(11), end: await dateFromNow(13), bonus: 250, minInvestmentLimit: ether('0.03'), hardcap: ether('5000000'), schedule: 2 }
     ];
     VESTING_SCHEDULES = [
       { index: 1, start: STAGES[1].start, duration: time.duration.days(300).toNumber(), interval: time.duration.days(30).toNumber() },
@@ -106,6 +106,60 @@ describe('CommonSale', async function () {
     const tranche4 = new BN((await getEvents(tx4, token, 'Transfer', web3))[0].args.value);
     const tokensExpected4 = tokensExpected.sub(tokensExpected1).sub(tokensExpected2).sub(tokensExpected3);
     expect(tranche4).to.be.bignumber.equal(tokensExpected4);
+
+    await expectRevert(sale.withdraw({ from: buyer }), 'CommonSale: No tokens available for withdrawal');
+  });
+
+  it('should behave correctly during all stages', async function () {
+    const ethSent0 = ether('0.123');
+    const ethSent1 = ether('0.456');
+    const ethSent2 = ether('0.789');
+
+    await increaseDateTo(STAGES[0].start);
+    const { tx: tx0 } = await sale.sendTransaction({ value: ethSent0, from: buyer });
+    const tokensExpected0 = ethSent0.muln(PRICE * (100 + STAGES[0].bonus)).divn(100);
+    const tokensReceived0 = new BN((await getEvents(tx0, token, 'Transfer', web3))[0].args.value);
+    expect(tokensReceived0).to.be.bignumber.equal(tokensExpected0);
+
+    await increaseDateTo(STAGES[1].start);
+    await sale.sendTransaction({ value: ethSent1, from: buyer });
+    const tokensExpected1 = ethSent1.muln(PRICE * (100 + STAGES[1].bonus)).divn(100);
+    const tokensBought1 = (await sale.balances(1, buyer)).initial;
+    expect(tokensBought1).to.be.bignumber.equal(tokensExpected1);
+    expect(await token.balanceOf(buyer)).to.be.bignumber.equal(tokensReceived0);
+
+    await increaseDateTo(STAGES[2].start);
+    await sale.sendTransaction({ value: ethSent2, from: buyer });
+    const tokensExpected2 = ethSent2.muln(PRICE * (100 + STAGES[2].bonus)).divn(100);
+    const tokensBought2 = (await sale.balances(2, buyer)).initial;
+    expect(tokensBought2).to.be.bignumber.equal(tokensExpected2);
+    expect(await token.balanceOf(buyer)).to.be.bignumber.equal(tokensReceived0);
+
+    await increaseDateTo(VESTING_SCHEDULES[1].start + VESTING_SCHEDULES[1].interval);
+    let { tx } = await sale.withdraw({ from: buyer });
+    let tranche = new BN((await getEvents(tx, token, 'Transfer', web3))[0].args.value);
+    let tokensVested1 = tokensExpected1.divn(Math.floor(VESTING_SCHEDULES[0].duration / VESTING_SCHEDULES[0].interval));
+    let tokensVested2 = tokensExpected2.divn(Math.floor(VESTING_SCHEDULES[1].duration / VESTING_SCHEDULES[1].interval));
+    let tokensExpected = tokensVested1.add(tokensVested2);
+    expect(tranche).to.be.bignumber.equal(tokensExpected);
+
+    await increaseDateTo(VESTING_SCHEDULES[1].start + VESTING_SCHEDULES[1].interval * 2);
+    tx = (await sale.withdraw({ from: buyer })).tx;
+    tranche = new BN((await getEvents(tx, token, 'Transfer', web3))[0].args.value);
+    tokensVested1 = tokensExpected1.divn(Math.floor(VESTING_SCHEDULES[0].duration / VESTING_SCHEDULES[0].interval));
+    tokensVested2 = tokensExpected2.divn(Math.floor(VESTING_SCHEDULES[1].duration / VESTING_SCHEDULES[1].interval));
+    tokensExpected = tokensVested1.add(tokensVested2);
+    expect(tranche).to.be.bignumber.equal(tokensExpected);
+
+    await increaseDateTo(VESTING_SCHEDULES[0].start + VESTING_SCHEDULES[0].interval * 3);
+    tx = (await sale.withdraw({ from: buyer })).tx;
+    tranche = new BN((await getEvents(tx, token, 'Transfer', web3))[0].args.value);
+    tokensExpected = tokensExpected1.divn(Math.floor(VESTING_SCHEDULES[0].duration / VESTING_SCHEDULES[0].interval));
+    expect(tranche).to.be.bignumber.equal(tokensExpected);
+
+    await increaseDateTo(VESTING_SCHEDULES[0].start + VESTING_SCHEDULES[0].duration);
+    await sale.withdraw({ from: buyer });
+    expect(await token.balanceOf(buyer)).to.be.bignumber.equal(tokensReceived0.add(tokensBought1).add(tokensBought2));
 
     await expectRevert(sale.withdraw({ from: buyer }), 'CommonSale: No tokens available for withdrawal');
   });
