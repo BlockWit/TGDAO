@@ -53,7 +53,7 @@ contract Configurator is RecoverableFunds {
         schedules[5] = VestingSchedule(0, 0, 0); // Seed round:         unlock 20% monthly after 6 months
         schedules[6] = VestingSchedule(0, 0, 0); // Funds round:        unlock 10% monthly after 3 months
 
-    // supplies
+        // supplies
         supplies[0]  = 3_000_000 ether; // Liquidity
         supplies[1]  =   600_000 ether; // Farming
         supplies[2]  =   250_000 ether; // Airdrop
@@ -95,6 +95,12 @@ contract Configurator is RecoverableFunds {
         // finish sale configuration
         sale.setToken(address(token));
         sale.transferOwnership(OWNER_ADDRESS);
+
+        // finish wallet configuration
+        for (uint256 i = 0; i < wallets.length; i++) {
+            wallets[i].setToken(address(token));
+            wallets[i].init();
+        }
     }
 
 }
