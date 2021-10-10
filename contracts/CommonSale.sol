@@ -72,7 +72,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
             VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
             if (vestedAmount <= 0) continue;
-            balance.withdrawed.add(vestedAmount);
+            balance.withdrawed = balance.withdrawed.add(vestedAmount);
             tokens = tokens.add(vestedAmount);
         }
         require(tokens > 0, "CommonSale: No tokens available for withdrawal");
