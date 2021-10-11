@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const Token = contract.fromArtifact('TGDAOToken');
 const VestingWallet = contract.fromArtifact('VestingWallet');
 
-const [owner, account1, walletOwner] = accounts;
+const [owner, account1, beneficiary] = accounts;
 const SUPPLY1 = ether('10000000');
 const WALLET_SUPPLY = ether('10000000');
 
@@ -22,23 +22,33 @@ describe('VestingWallet', async function () {
   describe('with a regular token release schedule', function () {
     beforeEach(async function () {
       START_DATE = (await time.latest()).toNumber();
-      wallet = await VestingWallet.new(START_DATE, DURATION, INTERVAL, { from: owner });
+      wallet = await VestingWallet.new(beneficiary, START_DATE, DURATION, INTERVAL, { from: owner });
       token = await Token.new([account1, await wallet.address], initialBalances, { from: owner });
       await wallet.setToken(await token.address, { from: owner });
       await wallet.lock({ from: owner });
-      await wallet.transferOwnership(walletOwner, { from: owner });
     });
 
     it('should have owner', async function () {
-      expect(await wallet.owner()).to.equal(walletOwner);
+      expect(await wallet.owner()).to.equal(owner);
+    });
+
+    it('should have beneficiary', async function () {
+      expect(await wallet.beneficiary()).to.equal(beneficiary);
     });
 
     it('should not allow withdrawing ahead of schedule', async function () {
-      await expectRevert(wallet.withdraw({ from: walletOwner }), 'No tokens available for withdrawal at this moment');
+      await expectRevert(wallet.withdraw({ from: beneficiary }), 'No tokens available for withdrawal at this moment');
     });
 
-    it('should not allow to withdraw TGO tokens using retriveTokens method', async function () {
-      await expectRevert(wallet.retrieveTokens(walletOwner, await token.address, { from: walletOwner }), 'You should only use this method to withdraw extraneous tokens.');
+    it('should not allow beneficiary to withdraw TGO tokens using retriveTokens method', async function () {
+      await expectRevert(wallet.retrieveTokens(beneficiary, await token.address, { from: beneficiary }), 'Ownable: caller is not the owner');
+    });
+
+    it('should allow owner to withdraw TGO tokens using retriveTokens method', async function () {
+      const balance = await token.balanceOf(await wallet.address);
+      const { tx } = await wallet.retrieveTokens(owner, await token.address, { from: owner });
+      const tokensReceived = new BN((await getEvents(tx, token, 'Transfer', web3))[0].args.value);
+      expect(tokensReceived).to.be.bignumber.equal(balance);
     });
 
     it('should allow withdrawal of tokens in accordance with the vesting schedule', async function () {
@@ -55,7 +65,7 @@ describe('VestingWallet', async function () {
       for (const { delay, remainder } of intervals()) {
         const currentDate = await time.latest();
         if (currentDate.toNumber() < START_DATE + delay) await time.increaseTo(START_DATE + delay);
-        const { receipt: { transactionHash } } = await wallet.withdraw({ from: walletOwner });
+        const { receipt: { transactionHash } } = await wallet.withdraw({ from: beneficiary });
         const events = await getEvents(transactionHash, token, 'Transfer', web3);
         const tokensToSend = new BN(events[0].args.value);
         const tokensRemained = await token.balanceOf(await wallet.address);
@@ -71,18 +81,17 @@ describe('VestingWallet', async function () {
       START_DATE = (await time.latest()).toNumber();
       DURATION = 360 * 24 * 3600;
       INTERVAL = 360 * 24 * 3600;
-      wallet = await VestingWallet.new(START_DATE, DURATION, INTERVAL, { from: owner });
+      wallet = await VestingWallet.new(beneficiary, START_DATE, DURATION, INTERVAL, { from: owner });
       token = await Token.new([account1, await wallet.address], initialBalances, { from: owner });
       await wallet.setToken(await token.address, { from: owner });
       await wallet.lock({ from: owner });
-      await wallet.transferOwnership(walletOwner, { from: owner });
     });
 
     it('should allow withdrawal of tokens', async function () {
       const delay = INTERVAL;
       const currentDate = await time.latest();
       if (currentDate.toNumber() < START_DATE + delay) await time.increaseTo(START_DATE + delay);
-      const { receipt: { transactionHash } } = await wallet.withdraw({ from: walletOwner });
+      const { receipt: { transactionHash } } = await wallet.withdraw({ from: beneficiary });
       const events = await getEvents(transactionHash, token, 'Transfer', web3);
       const tokensToSend = new BN(events[0].args.value);
       const tokensRemained = await token.balanceOf(await wallet.address);

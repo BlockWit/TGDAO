@@ -68,7 +68,7 @@ contract Configurator is RecoverableFunds {
         // create vesting wallets
         for (uint256 i = 0; i < walletOwners.length; i++) {
             VestingSchedule memory schedule = schedules[i];
-            VestingWallet wallet = new VestingWallet(schedule.start, schedule.duration, schedule.interval);
+            VestingWallet wallet = new VestingWallet(walletOwners[i], schedule.start, schedule.duration, schedule.interval);
             wallets.push(wallet);
             accounts[i + 3] = address(wallet);
         }
