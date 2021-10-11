@@ -70,9 +70,16 @@ EXODUS does not support BEP20, but provides the ability to export the private ke
 ## Main network configuration
 
 ### Contracts
-* [Configurator](https://etherscan.io)
-* [TGDAOToken](https://etherscan.io)
-* [Sale](https://etherscan.io)
+* [Configurator](https://bscscan.com/address/0x4f5e432adb7bfd035cef95f83efe9241752e5eaa#readContract)
+* [TGDAOToken](https://bscscan.com/token/0xd97f5162649aefd645966a67d25912b7201c5250)
+* [Sale](https://bscscan.com/address/0x1e051d51442ca3534fab5f3d1de405d5b0f1d90e#readContract)
+* Wallets
+  * [Company reserve](https://bscscan.com/address/0x8FFeC13A13010488d21eF3C239D7bD60C73c0Ed4#readContract)
+  * [Launch team](https://bscscan.com/address/0x2b47d8a88cd9dd4f96c6ba67dd5e0dfc6c2b846f#readContract)
+  * [Development team]( https://bscscan.com/address/0x49764dddc9a109537aa30d6a6a326e251cfa8dbc#readContract)
+  * [Marketing](https://bscscan.com/address/0xfd31fae5b3a36c02f6ab5dc40f51b65e75edf2be#readContract)
+  * [Advisors](https://bscscan.com/address/0x112553ef4509e37d24143c02dde89078c466300a#readContract)
+  * [Seed round](https://bscscan.com/address/0xd52b4cccd8b748d8b8747e3ad673107d59fbe5ef#readContract)
 
 ### Sale stages
 Base price                          : 3500 TGDAO per BNB
