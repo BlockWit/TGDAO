@@ -17,10 +17,10 @@ contract VestingWallet is Ownable, RecoverableFunds {
     uint256 public interval;
     uint256 public initialTokens;
     uint256 public withdrawedTokens;
-    bool private isActive;
+    bool public isStarted;
 
-    modifier notActive() {
-        require(!isActive, "Already active");
+    modifier notStarted() {
+        require(!isStarted, "VestingWallet: You can't call this function after freezing has started");
         _;
     }
 
@@ -30,19 +30,31 @@ contract VestingWallet is Ownable, RecoverableFunds {
         interval = _interval;
     }
 
-    function setToken(address tokenAddress) public onlyOwner notActive {
+    function setStart(uint256 newStart) public onlyOwner notStarted {
+        start = newStart;
+    }
+
+    function setDuration(uint newDuration) public onlyOwner notStarted {
+        duration = newDuration;
+    }
+
+    function setInterval(uint newInterval) public onlyOwner notStarted {
+        interval = newInterval;
+    }
+
+    function setToken(address tokenAddress) public onlyOwner notStarted {
         token = IERC20Cutted(tokenAddress);
     }
 
-    function init() public onlyOwner notActive {
+    function lock() public onlyOwner notStarted {
         uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "Initial balance is empty");
+        require(balance > 0, "VestingWallet: Initial balance is empty");
         initialTokens = balance;
-        isActive = true;
+        isStarted = true;
     }
 
     function withdraw() public onlyOwner {
-        require(block.timestamp >= start, "No tokens available for withdrawal at this moment");
+        require(block.timestamp >= start, "VestingWallet: No tokens available for withdrawal at this moment");
         if (block.timestamp >= start.add(duration)) {
             token.transfer(msg.sender, token.balanceOf(address(this)));
         } else {
@@ -52,14 +64,14 @@ contract VestingWallet is Ownable, RecoverableFunds {
             uint256 pastParts = timeSinceStart.div(interval);
             uint256 tokensToWithdrawSinceStart = pastParts.mul(tokensByPart);
             uint256 tokensToWithdraw = tokensToWithdrawSinceStart.sub(withdrawedTokens);
-            require(tokensToWithdraw > 0, "No tokens available for withdrawal at this moment");
+            require(tokensToWithdraw > 0, "VestingWallet: No tokens available for withdrawal at this moment");
             withdrawedTokens = withdrawedTokens.add(tokensToWithdraw);
             token.transfer(msg.sender, tokensToWithdraw);
         }
     }
 
     function retrieveTokens(address to, address anotherToken) override public onlyOwner {
-        require(address(token) != anotherToken, "You should only use this method to withdraw extraneous tokens");
+        require(address(token) != anotherToken, "VestingWallet: You should only use this method to withdraw extraneous tokens");
         super.retrieveTokens(to, anotherToken);
     }
 

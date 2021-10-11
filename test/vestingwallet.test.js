@@ -25,7 +25,7 @@ describe('VestingWallet', async function () {
       wallet = await VestingWallet.new(START_DATE, DURATION, INTERVAL, { from: owner });
       token = await Token.new([account1, await wallet.address], initialBalances, { from: owner });
       await wallet.setToken(await token.address, { from: owner });
-      await wallet.init({ from: owner });
+      await wallet.lock({ from: owner });
       await wallet.transferOwnership(walletOwner, { from: owner });
     });
 
@@ -74,7 +74,7 @@ describe('VestingWallet', async function () {
       wallet = await VestingWallet.new(START_DATE, DURATION, INTERVAL, { from: owner });
       token = await Token.new([account1, await wallet.address], initialBalances, { from: owner });
       await wallet.setToken(await token.address, { from: owner });
-      await wallet.init({ from: owner });
+      await wallet.lock({ from: owner });
       await wallet.transferOwnership(walletOwner, { from: owner });
     });
 
