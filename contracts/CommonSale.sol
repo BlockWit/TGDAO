@@ -29,7 +29,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
     address payable public wallet;
 
     mapping(uint256 => mapping(address => Balance)) public balances;
-    mapping(uint8 => VestingSchedule) vestingSchedules;
+    mapping(uint8 => VestingSchedule) public vestingSchedules;
 
     function setToken(address newTokenAddress) public onlyOwner {
         token = IERC20Cutted(newTokenAddress);
@@ -66,12 +66,11 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         uint256 tokens;
         for (uint256 stageIndex = 0; stageIndex < stages.length; stageIndex++) {
             Balance storage balance = balances[stageIndex][msg.sender];
-            if (balance.initial <= 0) continue;
+            if (balance.initial == 0) continue;
             uint8 scheduleIndex = stages[stageIndex].vestingSchedule;
-            if (scheduleIndex <= 0) continue;
             VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
-            if (vestedAmount <= 0) continue;
+            if (vestedAmount == 0) continue;
             balance.withdrawed = balance.withdrawed.add(vestedAmount);
             tokens = tokens.add(vestedAmount);
         }
@@ -118,7 +117,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         return (tokensWithBonus, tokenBasedLimitedInvestValue);
     }
 
-    function internalFallback() whenNotPaused internal returns (uint256) {
+    function internalFallback() internal whenNotPaused returns (uint256) {
         uint256 stageIndex = getCurrentStageOrRevert();
         Stage storage stage = stages[stageIndex];
         // check min investment limit
@@ -131,7 +130,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         stage.tokensSold = stage.tokensSold.add(tokens);
         // update balance and transfer tokens
         Balance storage balance = balances[stageIndex][msg.sender];
-        if (stage.vestingSchedule <= 0) {
+        if (stage.vestingSchedule == 0) {
             balance.initial = balance.initial.add(tokens);
             balance.withdrawed = balance.withdrawed.add(tokens);
             token.transfer(msg.sender, tokens);
