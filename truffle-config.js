@@ -61,6 +61,13 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
+    bsctestnet: {
+      provider: () => new HDWalletProvider(ETH_TEST_MNEMONIC, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+      network_id: 97,
+      gasPrice: 18000000000,  // 18 Gwei
+      confirmations: 2,
+      timeoutBlocks: 200,
+    },
     mainnet: {
       provider: () => new HDWalletProvider(ETH_MAIN_PRIVATE_KEYS, `https://mainnet.infura.io/v3/${CONFIG.INFURA_KEY}`),
       network_id: 1,
