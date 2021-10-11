@@ -43,4 +43,8 @@ function logger (network) {
   return { log, logRevert };
 }
 
-module.exports = { logger };
+async function timeout (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+module.exports = { logger, timeout };
