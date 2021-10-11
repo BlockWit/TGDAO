@@ -43,15 +43,15 @@ contract Configurator is RecoverableFunds {
         walletOwners[4] = 0x68E543680f1b91236c30d009FFE699f7f8DE1a49; // Advisors
         walletOwners[5] = 0x76E945bc22fd03C7268a33aD39beC7042Dfe5288; // Seed round
 
-        uint32 VESTING_START = 1635984000;
+        uint32 VESTING_START = 1636416000;
 
         // vesting schedules
-        schedules[0] = VestingSchedule(VESTING_START,  180 days, 180 days); // Company reserve:    lock for 6 months
-        schedules[1] = VestingSchedule(VESTING_START,  300 days,  30 days); // Launch team:        unlock 10% monthly after 3 months
-        schedules[2] = VestingSchedule(VESTING_START, 1200 days,  30 days); // Development team:   unlock 2,5% monthly after 6 months
-        schedules[3] = VestingSchedule(VESTING_START,  180 days, 180 days); // Marketing:          lock for 6 months
-        schedules[4] = VestingSchedule(VESTING_START,  300 days,  30 days); // Advisors:           unlock 10% monthly after 6 months
-        schedules[5] = VestingSchedule(VESTING_START,  150 days,  30 days); // Seed round:         unlock 20% monthly after 6 months
+        schedules[0] = VestingSchedule(VESTING_START,            180 days,  180 days); // Company reserve:    lock for 6 months
+        schedules[1] = VestingSchedule(VESTING_START + 90 days,  300 days,   30 days); // Launch team:        unlock 10% monthly after 3 months
+        schedules[2] = VestingSchedule(VESTING_START + 180 days, 1200 days,  30 days); // Development team:   unlock 2,5% monthly after 6 months
+        schedules[3] = VestingSchedule(VESTING_START,            180 days,  180 days); // Marketing:          lock for 6 months
+        schedules[4] = VestingSchedule(VESTING_START + 180 days, 300 days,   30 days); // Advisors:           unlock 10% monthly after 6 months
+        schedules[5] = VestingSchedule(VESTING_START + 180 days, 150 days,   30 days); // Seed round:         unlock 20% monthly after 6 months
 
         // supplies
         supplies[0] =  3_000_000 ether; // Liquidity
@@ -76,14 +76,14 @@ contract Configurator is RecoverableFunds {
         // create sale
         sale = new CommonSale();
         sale.setWallet(ETH_WALLET_ADDRESS);
-        sale.setPrice(3395 ether);
-        sale.setVestingSchedule(1, 0, 300 days, 30 days);
+        sale.setPrice(3500 ether);
+        sale.setVestingSchedule(1, VESTING_START + 90 days, 300 days, 30 days);
         // funds round
-        sale.addStage(1634256000, 1635120000, 200, 24540000000000000000, 0, 0, 3_500_000 ether, 1);
+        sale.addStage(1634256000, 1635120000, 200, 23786000000000000000, 0, 0, 3_500_000 ether, 1);
         // public partners round
-        sale.addStage(1635120000, 1635206400,  50, 24540000000000000000, 0, 0,   500_000 ether, 0);
+        sale.addStage(1635120000, 1635206400,  50, 23786000000000000000, 0, 0,   500_000 ether, 0);
         // public sale round
-        sale.addStage(1635897600, 1635984000,   0, 24540000000000000000, 0, 0, 6_000_000 ether, 0);
+        sale.addStage(1635897600, 1635984000,   0, 23786000000000000000, 0, 0, 6_000_000 ether, 0);
 
         accounts[9] = address(sale);
 
