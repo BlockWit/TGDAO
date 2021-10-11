@@ -21,16 +21,16 @@ TGDAO smart-contract
 3. _Sale_ - Sale contract
 
 ### Token distribution
-1. _Cpmany Reserve_: 2 400 000 (Lock for 6 month - FreezeWallet)
-2. _Launch tean_: 2 250 000 (Unlock 10% monthly after 3 months - FreezeWallet)
-3. _Development team_: 2 250 000 (Unlock 2.5% monthly after 3 months - FreezeWallet)
+1. _Company Reserve_: 2 400 000 (Lock for 6 month on VestingWallet)
+2. _Launch team_: 2 250 000 (Unlock 10% monthly after 3 months on VestingWallet)
+3. _Development team_: 2 250 000 (Unlock 2.5% monthly after 3 months on VestingWallet)
 4. _Liquidity_: 3 000 000
 5. _Farming_: 600 000
-6. _Marketing_ 4 500 000 (lock for 6 month)
-7. _Advisors_ 1 000 000 (Unlock 10% monthly after 3 months - FreezeWallet)
+6. _Marketing_ 4 500 000 (lock for 6 month on VestingWallet)
+7. _Advisors_ 1 000 000 (Unlock 10% monthly after 3 months on VestingWallet)
 8. _AirDrop_ 250 000
-9. _Seed round_ 3 750 000 (Unlock 10% monthly after 3 months - FreezeWallet)
-10. _Funds round_ 3 500 000 (Unlock 10% monthly after 3 months - FreezeWallet)
+9. _Seed round_ 3 750 000 (Unlock 10% monthly after 3 months on VestingWallet)
+10. _Funds round_ 3 500 000 (Unlock 10% monthly after 3 months on VestingWallet)
 11. _Public partners round_ 500 000
 12. _Public sale_ 6 000 000
 
@@ -75,26 +75,26 @@ EXODUS does not support BEP20, but provides the ability to export the private ke
 * [Sale](https://etherscan.io)
 
 ### Sale stages
-Base price                          : 3000 TGDAO per BNB
+Base price                          : 3500 TGDAO per BNB
 
 #### Stage 1 - Funds Round 
-* Bonus                             : 200% (price with bonus - 9000 TGDAO per BNB)
+* Bonus                             : 200% (price with bonus - 10500 TGDAO per BNB)
 * HardCap                           : 3 500 000 TGDAO
 * Start date                        : 15.10.2021
 * End date                          : 25.10.2021
 
 #### Stage 2 - Public Partners Round
-* Bonus                             : 100% (price with bonus - 6000 TGDAO per BNB)
+* Bonus                             : 50% (price with bonus - 5250 TGDAO per BNB)
 * HardCap                           : 500 000 TGDAO
 * Start date                        : 25.10.2021
-* End date                          : 03.11.2021
+* End date                          : 26.10.2021
 
 #### Stage 3 - Public Sale Round
-* Bonus                             : 0% (price with bonus - 3000 TGDAO per BNB)
+* Bonus                             : 0% (price with bonus - 3500 TGDAO per BNB)
 * HardCap                           : 6 000 000 TGDAO
 * Start date                        : 03.11.2021
-* End date                          : 10.11.2021
+* End date                          : 04.11.2021
 
-## Test network configuration (Kovan)
-You can find kovan test log [here](docs/kovan.log.md)
+## Test network configuration (BSC Testnet)
+You can find test log [here](docs/bsctestnet.log.md)
 
