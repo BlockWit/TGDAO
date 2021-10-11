@@ -22,8 +22,8 @@ contract Configurator is RecoverableFunds {
     }
 
     constructor() {
-        address         OWNER_ADDRESS      = address(0x0b2cBc8a2D434dc16818B0664Dd81e89fAA9c3AC);
-        address payable ETH_WALLET_ADDRESS = payable(0xf83c2172950d2Cc6490F164bb08F2381C2CdEc82);
+        address         OWNER_ADDRESS      = address(0xA8c578022409c7f44264A0742444f1399DAcD46b);
+        address payable ETH_WALLET_ADDRESS = payable(0x67B8CAF85C727A27935570Caf0e62f265c0d95ff);
 
         address[] memory accounts = new address[](10);
         address[] memory walletOwners = new address[](6);
@@ -31,17 +31,17 @@ contract Configurator is RecoverableFunds {
         uint256[] memory supplies = new uint256[](10);
 
         // casual eth accounts
-        accounts[0] = 0xe6Df6C96794063F2cC1Dc338908B2a04Ff29eBd4; // Liquidity
-        accounts[1] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Farming
-        accounts[2] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Airdrop
+        accounts[0] = 0x0113518FBcE33BA055d3753DaF0903f64a49554E; // Liquidity
+        accounts[1] = 0x7bd37252Fd94D98Dd9aF3e1aB45a58aC31B8a45F; // Farming
+        accounts[2] = 0xEb39C884d2C7B54520D0F9a24E0ffcf1aE6B58D0; // Airdrop
 
         // owners of vesting wallets
-        walletOwners[0] = 0xe74b3Ba0e474eA8EE89da99Ef38889ED229e8782; // Company reserve
-        walletOwners[1] = 0xe74b3Ba0e474eA8EE89da99Ef38889ED229e8782; // Launch team
-        walletOwners[2] = 0x539e3b4Cf63685cB2aE9adA4414335EB0B496Aec; // Development team
-        walletOwners[3] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Marketing
-        walletOwners[4] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Advisors
-        walletOwners[5] = 0x3aCe47351C48a4971b62176Ef3538C51397a0d5E; // Seed round
+        walletOwners[0] = 0x9241750A09CdB56D33582e2Ea92Ed448806B8f53; // Company reserve
+        walletOwners[1] = 0xf1edD24D2c517A17Ab1D32EE8d46C327c1389539; // Launch team
+        walletOwners[2] = 0x594c80E7dF5775b142587Cf3A609a010248EaBEc; // Development team
+        walletOwners[3] = 0xD00e8C8151Fadc16392796c50327E73d20Bb0dc1; // Marketing
+        walletOwners[4] = 0x68E543680f1b91236c30d009FFE699f7f8DE1a49; // Advisors
+        walletOwners[5] = 0x76E945bc22fd03C7268a33aD39beC7042Dfe5288; // Seed round
 
         uint32 VESTING_START = 1635984000;
 
