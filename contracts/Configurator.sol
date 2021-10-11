@@ -99,6 +99,7 @@ contract Configurator is RecoverableFunds {
         // finish wallet configuration
         for (uint256 i = 0; i < wallets.length; i++) {
             wallets[i].setToken(address(token));
+            wallets[i].transferOwnership(OWNER_ADDRESS);
         }
     }
 
