@@ -37,7 +37,7 @@ describe('VestingWallet', async function () {
     });
 
     it('should not allow withdrawing ahead of schedule', async function () {
-      await expectRevert(wallet.withdraw({ from: beneficiary }), 'No tokens available for withdrawal at this moment');
+      await expectRevert(wallet.withdraw({ from: beneficiary }), 'no tokens available for withdrawal at this moment');
     });
 
     it('should not allow beneficiary to withdraw TGO tokens using retriveTokens method', async function () {
@@ -76,7 +76,6 @@ describe('VestingWallet', async function () {
   });
 
   describe('with duration equal to interval', function () {
-
     beforeEach(async function () {
       START_DATE = (await time.latest()).toNumber();
       DURATION = 360 * 24 * 3600;

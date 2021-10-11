@@ -20,8 +20,13 @@ contract VestingWallet is Ownable, RecoverableFunds {
     uint256 public withdrawedTokens;
     bool public isLocked;
 
-    modifier notLocked() {
-        require(!isLocked, "VestingWallet: You can't call this function after freezing has started");
+    modifier whenLocked() {
+        require(isLocked, "VestingWallet: not locked");
+        _;
+    }
+
+    modifier whenNotLocked() {
+        require(!isLocked, "VestingWallet: locked");
         _;
     }
 
@@ -37,35 +42,35 @@ contract VestingWallet is Ownable, RecoverableFunds {
         interval = _interval;
     }
 
-    function setBeneficiary(address newBeneficiary) public onlyOwner notLocked {
+    function setBeneficiary(address newBeneficiary) public onlyOwner whenNotLocked {
         beneficiary = newBeneficiary;
     }
 
-    function setStart(uint256 newStart) public onlyOwner notLocked {
+    function setStart(uint256 newStart) public onlyOwner whenNotLocked {
         start = newStart;
     }
 
-    function setDuration(uint newDuration) public onlyOwner notLocked {
+    function setDuration(uint newDuration) public onlyOwner whenNotLocked {
         duration = newDuration;
     }
 
-    function setInterval(uint newInterval) public onlyOwner notLocked {
+    function setInterval(uint newInterval) public onlyOwner whenNotLocked {
         interval = newInterval;
     }
 
-    function setToken(address tokenAddress) public onlyOwner notLocked {
+    function setToken(address tokenAddress) public onlyOwner whenNotLocked {
         token = IERC20Cutted(tokenAddress);
     }
 
-    function lock() public onlyOwner notLocked {
+    function lock() public onlyOwner whenNotLocked {
         uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "VestingWallet: Initial balance is empty");
+        require(balance > 0, "VestingWallet: initial balance is empty");
         initialTokens = balance;
         isLocked = true;
     }
 
-    function withdraw() public onlyBeneficiary {
-        require(block.timestamp >= start, "VestingWallet: No tokens available for withdrawal at this moment");
+    function withdraw() public onlyBeneficiary whenLocked {
+        require(block.timestamp >= start, "VestingWallet: no tokens available for withdrawal at this moment");
         if (block.timestamp >= start.add(duration)) {
             token.transfer(msg.sender, token.balanceOf(address(this)));
         } else {
@@ -75,7 +80,7 @@ contract VestingWallet is Ownable, RecoverableFunds {
             uint256 pastParts = timeSinceStart.div(interval);
             uint256 tokensToWithdrawSinceStart = pastParts.mul(tokensByPart);
             uint256 tokensToWithdraw = tokensToWithdrawSinceStart.sub(withdrawedTokens);
-            require(tokensToWithdraw > 0, "VestingWallet: No tokens available for withdrawal at this moment");
+            require(tokensToWithdraw > 0, "VestingWallet: no tokens available for withdrawal at this moment");
             withdrawedTokens = withdrawedTokens.add(tokensToWithdraw);
             token.transfer(msg.sender, tokensToWithdraw);
         }
