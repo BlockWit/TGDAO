@@ -99,9 +99,11 @@ Base price                          : 3500 TGDAO per BNB
 #### Stage 3 - Public Sale Round
 * Bonus                             : 0% (price with bonus - 3500 TGDAO per BNB)
 * HardCap                           : 6 000 000 TGDAO
-* Start date                        : 03.11.2021
-* End date                          : 04.11.2021
+* Start date                        : 12.11.2021
+* End date                          : 19.11.2021
 
 ## Test network configuration (BSC Testnet)
 You can find test log [here](docs/bsctestnet.log.md)
 
+## User guide
+You can find the user guide for end-users [here](docs/user.md)
