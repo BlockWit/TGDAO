@@ -111,5 +111,9 @@ Base price                          : 3500 TGDAO per BNB
 ## Test network configuration (BSC Testnet)
 You can find test log [here](docs/bsctestnet.log.md)
 
-## User guide
+## User's guide
 You can find the user guide for end-users [here](docs/user.md)
+
+## Manager's guide
+Our manager's guide can be found [here](docs/manager.md)  
+Additional info about smart contract's capabilities (in Russian) [here](docs/additional.md)
