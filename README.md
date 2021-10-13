@@ -89,18 +89,24 @@ Base price                          : 3500 TGDAO per BNB
 * HardCap                           : 3 500 000 TGDAO
 * Start date                        : 15.10.2021
 * End date                          : 25.10.2021
+* Min investment                    : 23.786 BNB
+* Vesting schedule                  : Tokens remain on the sale contract after the purchase and can be withdrawn from the contract in accordance with the following vesting schedule: 10% every month after 3 months.
 
 #### Stage 2 - Public Partners Round
 * Bonus                             : 50% (price with bonus - 5250 TGDAO per BNB)
 * HardCap                           : 500 000 TGDAO
 * Start date                        : 25.10.2021
 * End date                          : 26.10.2021
+* Min investment                    : 23.786 BNB
+* Vesting schedule                  : Not available. All purchased tokens are transferred to the user immediately
 
 #### Stage 3 - Public Sale Round
 * Bonus                             : 0% (price with bonus - 3500 TGDAO per BNB)
 * HardCap                           : 6 000 000 TGDAO
 * Start date                        : 12.11.2021
 * End date                          : 19.11.2021
+* Min investment                    : 23.786 BNB
+* Vesting schedule                  : Not available. All purchased tokens are transferred to the user immediately
 
 ## Test network configuration (BSC Testnet)
 You can find test log [here](docs/bsctestnet.log.md)
