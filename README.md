@@ -1,4 +1,4 @@
-![TGDAO](logo.png "TGDAO Token")
+![TGDAO](tgdao-black.svg "TGDAO Token")
 
 # TGDAO smart contracts
 
