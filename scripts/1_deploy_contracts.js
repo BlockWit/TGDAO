@@ -70,6 +70,9 @@ async function deploy () {
     accounts.push(wallet.address);
   }
 
+  console.log('Wallet addresses:');
+  console.log(wallets.map(wallet => wallet.address));
+
   const sale = await Sale.new({ from: deployer });
   log(`Sale deployed: @address{${sale.address}}`);
 
@@ -108,15 +111,15 @@ async function deploy () {
   tx = await sale.setToken(token.address);
   log(`Sale token set. Tx: @tx{${tx.receipt.transactionHash}}`);
 
-  tx = await sale.transferOwnership(OWNER_ADDRESS);
-  log(`Sale ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
+  // tx = await sale.transferOwnership(OWNER_ADDRESS);
+  // log(`Sale ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
 
   // finish wallet configuration
   for (let i = 0; i < wallets.length; i++) {
     tx = await wallets[i].setToken(token.address);
     log(`Wallet ${i} token set. Tx: @tx{${tx.receipt.transactionHash}}`);
-    tx = await wallets[i].transferOwnership(OWNER_ADDRESS);
-    log(`Wallet ${i} ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
+    // tx = await wallets[i].transferOwnership(OWNER_ADDRESS);
+    // log(`Wallet ${i} ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
   }
 }
 
