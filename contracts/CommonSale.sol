@@ -22,6 +22,9 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         uint256 interval;
     }
 
+    event Deposit(address account, uint256 tokens);
+    event Withdrawal(address account, uint256 tokens);
+
     IERC20Cutted public token;
     uint256 public price; // amount of tokens per 1 ETH
     uint256 public invested;
@@ -93,6 +96,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         }
         require(tokens > 0, "CommonSale: No tokens available for withdrawal");
         token.transfer(msg.sender, tokens);
+        emit Withdrawal(msg.sender, tokens);
         return tokens;
     }
 
@@ -101,6 +105,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
     }
 
     function calculateVestedAmount(Balance memory balance, VestingSchedule memory schedule) internal view returns (uint256) {
+        if (block.timestamp < schedule.start) return 0;
         uint256 tokensAvailable;
         if (block.timestamp >= schedule.start.add(schedule.duration)) {
             tokensAvailable = balance.initial;
@@ -160,6 +165,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
             payable(msg.sender).transfer(change);
         }
 
+        emit Deposit(msg.sender, tokens);
         return tokens;
     }
 
