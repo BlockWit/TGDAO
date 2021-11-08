@@ -17,7 +17,7 @@ contract VestingWallet is Ownable, RecoverableFunds {
     uint256 public duration;
     uint256 public interval;
     uint256 public initialTokens;
-    uint256 public withdrawedTokens;
+    uint256 public withdrawnTokens;
     bool public isLocked;
 
     modifier whenLocked() {
@@ -79,9 +79,9 @@ contract VestingWallet is Ownable, RecoverableFunds {
             uint256 timeSinceStart = block.timestamp.sub(start);
             uint256 pastParts = timeSinceStart.div(interval);
             uint256 tokensToWithdrawSinceStart = pastParts.mul(tokensByPart);
-            uint256 tokensToWithdraw = tokensToWithdrawSinceStart.sub(withdrawedTokens);
+            uint256 tokensToWithdraw = tokensToWithdrawSinceStart.sub(withdrawnTokens);
             require(tokensToWithdraw > 0, "VestingWallet: no tokens available for withdrawal at this moment");
-            withdrawedTokens = withdrawedTokens.add(tokensToWithdraw);
+            withdrawnTokens = withdrawnTokens.add(tokensToWithdraw);
             token.transfer(msg.sender, tokensToWithdraw);
         }
     }
