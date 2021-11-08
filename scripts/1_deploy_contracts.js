@@ -104,8 +104,8 @@ async function deploy () {
   const token = await Token.new(accounts, supplies, { from: deployer });
   log(`Token deployed: @address{${token.address}}`);
 
-  tx = await token.transferOwnership(OWNER_ADDRESS);
-  log(`Token ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
+  // tx = await token.transferOwnership(OWNER_ADDRESS);
+  // log(`Token ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
 
   // finish sale configuration
   tx = await sale.setToken(token.address);
