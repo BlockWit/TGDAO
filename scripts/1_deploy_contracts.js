@@ -58,6 +58,8 @@ async function deploy () {
   supplies[9] = toWei('3750000', 'ether'); // Seed round
   supplies[10] = toWei('7000000', 'ether'); // Funds (3.5M) + Public partners (500K) + Public sale (3M)
 
+  let tx;
+
   // create vesting wallets
   const wallets = [];
   for (let i = 0; i < walletOwners.length; i++) {
@@ -70,21 +72,27 @@ async function deploy () {
 
   const sale = await Sale.new({ from: deployer });
   log(`Sale deployed: @address{${sale.address}}`);
-  await sale.setWallet(ETH_WALLET_ADDRESS);
-  log(`Sale wallet set`);
-  await sale.setPrice(toWei('3500', 'ether'), { from: deployer });
-  log(`Sale price set`);
-  await sale.setVestingSchedule(1, VESTING_START.add(time.duration.days(90)), time.duration.days(300), time.duration.days(30));
-  log(`Sale vesting schedule set`);
+
+  tx = await sale.setWallet(ETH_WALLET_ADDRESS);
+  log(`Sale wallet set. Tx: @tx{${tx.receipt.transactionHash}}`);
+
+  tx = await sale.setPrice(toWei('3500', 'ether'), { from: deployer });
+  log(`Sale price set. Tx: @tx{${tx.receipt.transactionHash}}`);
+
+  tx = await sale.setVestingSchedule(1, VESTING_START.add(time.duration.days(90)), time.duration.days(300), time.duration.days(30));
+  log(`Sale vesting schedule set. Tx: @tx{${tx.receipt.transactionHash}}`);
+
   // funds round
-  await sale.addStage(1634256000, 1635120000, 200, toWei('23.786', 'ether'), 0, 0, toWei('3500000', 'ether'), 1);
-  log(`Sale stage 0 added`);
+  tx = await sale.addStage(1634256000, 1635120000, 200, toWei('23.786', 'ether'), 0, 0, toWei('3500000', 'ether'), 1);
+  log(`Sale stage 0 added. Tx: @tx{${tx.receipt.transactionHash}}`);
+
   // public partners round
-  await sale.addStage(1635120000, 1635206400, 50, toWei('23.786', 'ether'), 0, 0, toWei('500000', 'ether'), 0);
-  log(`Sale stage 1 added`);
+  tx = await sale.addStage(1635120000, 1635206400, 50, toWei('23.786', 'ether'), 0, 0, toWei('500000', 'ether'), 0);
+  log(`Sale stage 1 added. Tx: @tx{${tx.receipt.transactionHash}}`);
+
   // public sale round
-  await sale.addStage(1635897600, 1635984000, 0, toWei('23.786', 'ether'), 0, 0, toWei('6000000', 'ether'), 0);
-  log(`Sale stage 2 added`);
+  tx = await sale.addStage(1635897600, 1635984000, 0, toWei('23.786', 'ether'), 0, 0, toWei('6000000', 'ether'), 0);
+  log(`Sale stage 2 added. Tx: @tx{${tx.receipt.transactionHash}}`);
 
   accounts.push(sale.address);
 
@@ -92,21 +100,23 @@ async function deploy () {
 
   const token = await Token.new(accounts, supplies, { from: deployer });
   log(`Token deployed: @address{${token.address}}`);
-  await token.transferOwnership(OWNER_ADDRESS);
-  log(`Token ownership transferred`);
+
+  tx = await token.transferOwnership(OWNER_ADDRESS);
+  log(`Token ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
 
   // finish sale configuration
-  await sale.setToken(token.address);
-  log(`Sale token set`);
-  await sale.transferOwnership(OWNER_ADDRESS);
-  log(`Sale ownership transferred`);
+  tx = await sale.setToken(token.address);
+  log(`Sale token set. Tx: @tx{${tx.receipt.transactionHash}}`);
+
+  tx = await sale.transferOwnership(OWNER_ADDRESS);
+  log(`Sale ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
 
   // finish wallet configuration
   for (let i = 0; i < wallets.length; i++) {
-    await wallets[i].setToken(token.address);
-    log(`Wallet ${i} token set`);
-    await wallets[i].transferOwnership(OWNER_ADDRESS);
-    log(`Wallet ${i} ownership transferred`);
+    tx = await wallets[i].setToken(token.address);
+    log(`Wallet ${i} token set. Tx: @tx{${tx.receipt.transactionHash}}`);
+    tx = await wallets[i].transferOwnership(OWNER_ADDRESS);
+    log(`Wallet ${i} ownership transferred. Tx: @tx{${tx.receipt.transactionHash}}`);
   }
 }
 
