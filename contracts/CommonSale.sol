@@ -71,7 +71,6 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         uint256 vested;
         for (uint8 stageIndex = 0; stageIndex < stages.length; stageIndex++) {
             Balance memory balance = balances[stageIndex][account];
-            if (balance.initial == 0) continue;
             uint8 scheduleIndex = stages[stageIndex].vestingSchedule;
             VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
