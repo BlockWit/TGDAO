@@ -62,6 +62,23 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         _unpause();
     }
 
+    function getAccountInfo(address account) public view returns (uint256, uint256, uint256) {
+        uint256 initial;
+        uint256 withdrawn;
+        uint256 vested;
+        for (uint8 stageIndex = 0; stageIndex < stages.length; stageIndex++) {
+            Balance memory balance = balances[stageIndex][account];
+            if (balance.initial == 0) continue;
+            uint8 scheduleIndex = stages[stageIndex].vestingSchedule;
+            VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
+            uint256 vestedAmount = calculateVestedAmount(balance, schedule);
+            initial = initial.add(balance.initial);
+            withdrawn = withdrawn.add(balance.withdrawed);
+            vested = vested.add(vestedAmount);
+        }
+        return (initial, withdrawn, vested);
+    }
+
     function withdraw() public whenNotPaused returns (uint256) {
         uint256 tokens;
         for (uint256 stageIndex = 0; stageIndex < stages.length; stageIndex++) {
