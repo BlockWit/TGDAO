@@ -13,7 +13,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
 
     struct Balance {
         uint256 initial;
-        uint256 withdrawed;
+        uint256 withdrawn;
     }
 
     struct VestingSchedule {
@@ -73,7 +73,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
             VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
             initial = initial.add(balance.initial);
-            withdrawn = withdrawn.add(balance.withdrawed);
+            withdrawn = withdrawn.add(balance.withdrawn);
             vested = vested.add(vestedAmount);
         }
         return (initial, withdrawn, vested);
@@ -88,7 +88,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
             VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
             if (vestedAmount == 0) continue;
-            balance.withdrawed = balance.withdrawed.add(vestedAmount);
+            balance.withdrawn = balance.withdrawn.add(vestedAmount);
             tokens = tokens.add(vestedAmount);
         }
         require(tokens > 0, "CommonSale: No tokens available for withdrawal");
@@ -111,7 +111,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
             uint256 pastParts = timeSinceStart.div(schedule.interval);
             tokensAvailable = tokensByPart.mul(pastParts);
         }
-        return tokensAvailable.sub(balance.withdrawed);
+        return tokensAvailable.sub(balance.withdrawn);
     }
 
     function calculateInvestmentAmounts(Stage memory stage) internal view returns (uint256, uint256) {
@@ -149,7 +149,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         Balance storage balance = balances[stageIndex][msg.sender];
         if (stage.vestingSchedule == 0) {
             balance.initial = balance.initial.add(tokens);
-            balance.withdrawed = balance.withdrawed.add(tokens);
+            balance.withdrawn = balance.withdrawn.add(tokens);
             token.transfer(msg.sender, tokens);
         } else {
             balance.initial = balance.initial.add(tokens);
