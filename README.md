@@ -32,7 +32,8 @@ TGDAO smart-contract
 9. _Seed round_ 3 750 000 (Unlock 10% monthly after 3 months on VestingWallet)
 10. _Funds round_ 3 500 000 (Unlock 10% monthly after 3 months on VestingWallet)
 11. _Public partners round_ 500 000
-12. _Public sale_ 6 000 000
+12. _Public sale_ 3 000 000
+13. _Swap fund_ 3 000 000
 
 ### How to work with this project
 #### To start working with the contracts, please, follow theese steps for each contract:
