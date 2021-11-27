@@ -10,8 +10,7 @@
 * [Calling function](#calling-function)
 * [How to set price in the CommonSale smart contract](#How-to-set-price-in-the-CommonSale-smart-contract)
 * [How to update stage parameters in the CommonSale smart contract](#How-to-update-stage-parameters-in-the-CommonSale-smart-contract)
-* [How to unlock token transfer](#How-to-unlock-token-transfer)
-* [How to withdraw tokens from freezeWallet](#how-to-withdraw-tokens-from-freezewallet)
+* [Pausable](#pausable)
 
 ## Overview
 Interaction with the smart contract is provided by calling smart contract functions with parameters.  
