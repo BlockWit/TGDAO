@@ -3,8 +3,7 @@
 pragma solidity ^0.8.0;
 
 /**
- * @dev Some old tokens are implemented without the `returns` keyword (this was prior to the ERC20 standart change).
- * That's why we are using our own ERC20 interface.
+ * @dev Interface of MultiWallet contract.
  */
 interface IMultiWallet {
 
