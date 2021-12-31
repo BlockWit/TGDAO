@@ -19,7 +19,7 @@ library Vesting {
         uint256 interval;
     }
 
-    struct Map {
+    struct Schedules {
         EnumerableSet.UintSet _keys;
         mapping(uint256 => Schedule) _values;
     }
@@ -31,7 +31,7 @@ library Vesting {
      * Returns true if the key was added to the map, that is if it was not
      * already present.
      */
-    function set(Map storage map, uint256 key, Schedule memory value) internal returns (bool) {
+    function set(Schedules storage map, uint256 key, Schedule memory value) internal returns (bool) {
         map._values[key] = value;
         return map._keys.add(key);
     }
@@ -41,7 +41,7 @@ library Vesting {
      *
      * Returns true if the key was removed from the map, that is if it was present.
      */
-    function remove(Map storage map, uint256 key) internal returns (bool) {
+    function remove(Schedules storage map, uint256 key) internal returns (bool) {
         delete map._values[key];
         return map._keys.remove(key);
     }
@@ -49,14 +49,14 @@ library Vesting {
     /**
      * @dev Returns true if the key is in the map. O(1).
      */
-    function contains(Map storage map, uint256 key) internal view returns (bool) {
+    function contains(Schedules storage map, uint256 key) internal view returns (bool) {
         return map._keys.contains(key);
     }
 
     /**
      * @dev Returns the number of key-value pairs in the map. O(1).
      */
-    function length(Map storage map) internal view returns (uint256) {
+    function length(Schedules storage map) internal view returns (uint256) {
         return map._keys.length();
     }
 
@@ -70,7 +70,7 @@ library Vesting {
      *
      * - `index` must be strictly less than {length}.
      */
-    function at(Map storage map, uint256 index) internal view returns (uint256, Schedule storage) {
+    function at(Schedules storage map, uint256 index) internal view returns (uint256, Schedule storage) {
         uint256 key = map._keys.at(index);
         return (key, map._values[key]);
     }
@@ -82,7 +82,7 @@ library Vesting {
      *
      * - `key` must be in the map.
      */
-    function get(Map storage map, uint256 key) internal view returns (Schedule storage) {
+    function get(Schedules storage map, uint256 key) internal view returns (Schedule storage) {
         Schedule storage value = map._values[key];
         require(contains(map, key), "Vesting.Map: nonexistent key");
         return value;

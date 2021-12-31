@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/IMultiWallet.sol";
+import "./interfaces/IVestingWallet.sol";
 import "./RecoverableFunds.sol";
 import "./StagedCrowdsale.sol";
 
@@ -13,7 +13,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
     using SafeMath for uint256;
 
     IERC20 public token;
-    IMultiWallet public multiWallet;
+    IVestingWallet public vestingWallet;
     uint256 public price; // amount of tokens per 1 ETH
     uint256 public invested;
     uint256 public percentRate = 100;
@@ -75,8 +75,8 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         invested = invested.add(investment);
         stage.tokensSold = stage.tokensSold.add(tokens);
         // transfer tokens
-        token.approve(address(multiWallet), tokens);
-        multiWallet.deposit(stage.vestingSchedule, msg.sender, tokens);
+        token.approve(address(vestingWallet), tokens);
+        vestingWallet.deposit(stage.vestingSchedule, msg.sender, tokens);
         // transfer ETH
         wallet.transfer(investment);
         if (change > 0) {

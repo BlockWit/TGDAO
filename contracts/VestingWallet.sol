@@ -9,13 +9,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./RecoverableFunds.sol";
 import "./Vesting.sol";
 
-contract MultiWallet is Ownable, Pausable, RecoverableFunds {
+contract VestingWallet is Ownable, Pausable, RecoverableFunds {
 
     using SafeMath for uint256;
-    using Vesting for Vesting.Map;
+    using Vesting for Vesting.Schedules;
 
     IERC20 public token;
-    Vesting.Map private schedules;
+    Vesting.Schedules private schedules;
     mapping(uint256 => mapping(address => Vesting.Balance)) public balances;
 
     event Deposit(address account, uint256 tokens);
