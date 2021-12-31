@@ -3,7 +3,8 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "./interfaces/IERC20Cutted.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interfaces/IMultiWallet.sol";
 import "./RecoverableFunds.sol";
 import "./StagedCrowdsale.sol";
 
@@ -11,31 +12,23 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
 
     using SafeMath for uint256;
 
-    struct Balance {
-        uint256 initial;
-        uint256 withdrawn;
-    }
-
-    struct VestingSchedule {
-        uint256 start;
-        uint256 duration;
-        uint256 interval;
-    }
-
-    event Deposit(address account, uint256 tokens);
-    event Withdrawal(address account, uint256 tokens);
-
-    IERC20Cutted public token;
+    IERC20 public token;
+    IMultiWallet public multiWallet;
     uint256 public price; // amount of tokens per 1 ETH
     uint256 public invested;
     uint256 public percentRate = 100;
     address payable public wallet;
 
-    mapping(uint256 => mapping(address => Balance)) public balances;
-    mapping(uint8 => VestingSchedule) public vestingSchedules;
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
 
     function setToken(address newTokenAddress) public onlyOwner {
-        token = IERC20Cutted(newTokenAddress);
+        token = IERC20(newTokenAddress);
     }
 
     function setPercentRate(uint256 newPercentRate) public onlyOwner {
@@ -48,74 +41,6 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
 
     function setPrice(uint256 newPrice) public onlyOwner {
         price = newPrice;
-    }
-
-    function setVestingSchedule(uint8 id, uint256 start, uint256 duration, uint256 interval) public onlyOwner {
-        VestingSchedule storage schedule = vestingSchedules[id];
-        schedule.start = start;
-        schedule.duration = duration;
-        schedule.interval = interval;
-    }
-
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    function unpause() public onlyOwner {
-        _unpause();
-    }
-
-    function getAccountInfo(address account) public view returns (uint256, uint256, uint256) {
-        uint256 initial;
-        uint256 withdrawn;
-        uint256 vested;
-        for (uint8 stageIndex = 0; stageIndex < stages.length; stageIndex++) {
-            Balance memory balance = balances[stageIndex][account];
-            uint8 scheduleIndex = stages[stageIndex].vestingSchedule;
-            VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
-            uint256 vestedAmount = calculateVestedAmount(balance, schedule);
-            initial = initial.add(balance.initial);
-            withdrawn = withdrawn.add(balance.withdrawn);
-            vested = vested.add(vestedAmount);
-        }
-        return (initial, withdrawn, vested);
-    }
-
-    function withdraw() public whenNotPaused returns (uint256) {
-        uint256 tokens;
-        for (uint256 stageIndex = 0; stageIndex < stages.length; stageIndex++) {
-            Balance storage balance = balances[stageIndex][msg.sender];
-            if (balance.initial == 0) continue;
-            uint8 scheduleIndex = stages[stageIndex].vestingSchedule;
-            VestingSchedule memory schedule = vestingSchedules[scheduleIndex];
-            uint256 vestedAmount = calculateVestedAmount(balance, schedule);
-            if (vestedAmount == 0) continue;
-            balance.withdrawn = balance.withdrawn.add(vestedAmount);
-            tokens = tokens.add(vestedAmount);
-        }
-        require(tokens > 0, "CommonSale: No tokens available for withdrawal");
-        token.transfer(msg.sender, tokens);
-        emit Withdrawal(msg.sender, tokens);
-        return tokens;
-    }
-
-    receive() external payable {
-        internalFallback();
-    }
-
-    function calculateVestedAmount(Balance memory balance, VestingSchedule memory schedule) internal view returns (uint256) {
-        if (block.timestamp < schedule.start) return 0;
-        uint256 tokensAvailable;
-        if (block.timestamp >= schedule.start.add(schedule.duration)) {
-            tokensAvailable = balance.initial;
-        } else {
-            uint256 parts = schedule.duration.div(schedule.interval);
-            uint256 tokensByPart = balance.initial.div(parts);
-            uint256 timeSinceStart = block.timestamp.sub(schedule.start);
-            uint256 pastParts = timeSinceStart.div(schedule.interval);
-            tokensAvailable = tokensByPart.mul(pastParts);
-        }
-        return tokensAvailable.sub(balance.withdrawn);
     }
 
     function calculateInvestmentAmounts(Stage memory stage) internal view returns (uint256, uint256) {
@@ -138,7 +63,7 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         return (tokensWithBonus, tokenBasedLimitedInvestValue);
     }
 
-    function internalFallback() internal whenNotPaused returns (uint256) {
+    receive() external payable whenNotPaused {
         uint256 stageIndex = getCurrentStageOrRevert();
         Stage storage stage = stages[stageIndex];
         // check min investment limit
@@ -149,23 +74,14 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         // update stats
         invested = invested.add(investment);
         stage.tokensSold = stage.tokensSold.add(tokens);
-        // update balance and transfer tokens
-        Balance storage balance = balances[stageIndex][msg.sender];
-        if (stage.vestingSchedule == 0) {
-            balance.initial = balance.initial.add(tokens);
-            balance.withdrawn = balance.withdrawn.add(tokens);
-            token.transfer(msg.sender, tokens);
-        } else {
-            balance.initial = balance.initial.add(tokens);
-        }
+        // transfer tokens
+        token.approve(address(multiWallet), tokens);
+        multiWallet.deposit(stage.vestingSchedule, msg.sender, tokens);
         // transfer ETH
         wallet.transfer(investment);
         if (change > 0) {
             payable(msg.sender).transfer(change);
         }
-
-        emit Deposit(msg.sender, tokens);
-        return tokens;
     }
 
 }
