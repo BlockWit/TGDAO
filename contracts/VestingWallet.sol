@@ -7,16 +7,21 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./RecoverableFunds.sol";
-import "./Vesting.sol";
+import "./Schedules.sol";
 
 contract VestingWallet is Ownable, Pausable, RecoverableFunds {
 
     using SafeMath for uint256;
-    using Vesting for Vesting.Schedules;
+    using Schedules for Schedules.Map;
+
+    struct Balance {
+        uint256 initial;
+        uint256 withdrawn;
+    }
 
     IERC20 public token;
-    Vesting.Schedules private schedules;
-    mapping(uint256 => mapping(address => Vesting.Balance)) public balances;
+    Schedules.Map private schedules;
+    mapping(uint256 => mapping(address => Balance)) public balances;
 
     event Deposit(address account, uint256 tokens);
     event Withdrawal(address account, uint256 tokens);
@@ -34,25 +39,25 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
     }
 
     function setVestingSchedule(uint256 id, uint256 start, uint256 duration, uint256 interval) public onlyOwner returns (bool) {
-        return schedules.set(id, Vesting.Schedule(start, duration, interval));
+        return schedules.set(id, Schedules.Schedule(start, duration, interval));
     }
 
     function removeVestingSchedule(uint256 id) public onlyOwner returns (bool) {
         return schedules.remove(id);
     }
 
-    function getVestingSchedule(uint256 id) public view returns (Vesting.Schedule memory) {
+    function getVestingSchedule(uint256 id) public view returns (Schedules.Schedule memory) {
         return schedules.get(id);
     }
 
     function setBalance(uint256 schedule, address account, uint256 initial, uint256 withdrawn) public onlyOwner {
-        balances[schedule][account] = Vesting.Balance(initial, withdrawn);
+        balances[schedule][account] = Balance(initial, withdrawn);
     }
 
     function addBalances(uint256 schedule, address[] calldata addresses, uint256[] calldata amounts) public onlyOwner {
         require(addresses.length == amounts.length, "MultiWallet: Incorrect array length.");
         for (uint256 i = 0; i < addresses.length; i++) {
-            Vesting.Balance storage balance = balances[schedule][addresses[i]];
+            Balance storage balance = balances[schedule][addresses[i]];
             balance.initial = balance.initial.add(amounts[i]);
             emit Deposit(addresses[i], amounts[i]);
         }
@@ -60,7 +65,7 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
 
     function deposit(uint256 schedule, address beneficiary, uint256 amount) public {
         token.transferFrom(msg.sender, address(this), amount);
-        Vesting.Balance storage balance = balances[schedule][beneficiary];
+        Balance storage balance = balances[schedule][beneficiary];
         balance.initial = balance.initial.add(amount);
         emit Deposit(beneficiary, amount);
     }
@@ -70,8 +75,8 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
         uint256 withdrawn;
         uint256 vested;
         for (uint256 index = 0; index < schedules.length(); index++) {
-            Vesting.Balance memory balance = balances[index][account];
-            Vesting.Schedule memory schedule = schedules.get(index);
+            Balance memory balance = balances[index][account];
+            Schedules.Schedule memory schedule = schedules.get(index);
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
             initial = initial.add(balance.initial);
             withdrawn = withdrawn.add(balance.withdrawn);
@@ -83,9 +88,9 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
     function withdraw() public whenNotPaused returns (uint256) {
         uint256 tokens;
         for (uint256 index = 0; index < schedules.length(); index++) {
-            Vesting.Balance storage balance = balances[index][msg.sender];
+            Balance storage balance = balances[index][msg.sender];
             if (balance.initial == 0) continue;
-            Vesting.Schedule memory schedule = schedules.get(index);
+            Schedules.Schedule memory schedule = schedules.get(index);
             uint256 vestedAmount = calculateVestedAmount(balance, schedule);
             if (vestedAmount == 0) continue;
             balance.withdrawn = balance.withdrawn.add(vestedAmount);
@@ -97,7 +102,7 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
         return tokens;
     }
 
-    function calculateVestedAmount(Vesting.Balance memory balance, Vesting.Schedule memory schedule) internal view returns (uint256) {
+    function calculateVestedAmount(Balance memory balance, Schedules.Schedule memory schedule) internal view returns (uint256) {
         if (block.timestamp < schedule.start) return 0;
         uint256 tokensAvailable;
         if (block.timestamp >= schedule.start.add(schedule.duration)) {
