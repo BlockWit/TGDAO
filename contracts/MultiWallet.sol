@@ -33,9 +33,12 @@ contract MultiWallet is Ownable, Pausable, RecoverableFunds {
         token = IERC20(tokenAddress);
     }
 
-    function setVestingSchedule(uint256 id, uint256 start, uint256 duration, uint256 interval) public onlyOwner {
-        Vesting.Schedule memory schedule = Vesting.Schedule(start, duration, interval);
-        schedules.set(id, schedule);
+    function setVestingSchedule(uint256 id, uint256 start, uint256 duration, uint256 interval) public onlyOwner returns (bool) {
+        return schedules.set(id, Vesting.Schedule(start, duration, interval));
+    }
+
+    function removeVestingSchedule(uint256 id) public onlyOwner returns (bool) {
+        return schedules.remove(id);
     }
 
     function getVestingSchedule(uint256 id) public view returns (Vesting.Schedule memory) {
@@ -43,9 +46,7 @@ contract MultiWallet is Ownable, Pausable, RecoverableFunds {
     }
 
     function setBalance(uint256 schedule, address account, uint256 initial, uint256 withdrawn) public onlyOwner {
-        Vesting.Balance storage balance = balances[schedule][account];
-        balance.initial = initial;
-        balance.withdrawn = withdrawn;
+        balances[schedule][account] = Vesting.Balance(initial, withdrawn);
     }
 
     function addBalances(uint256 schedule, address[] calldata addresses, uint256[] calldata amounts) public onlyOwner {
