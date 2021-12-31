@@ -4,16 +4,19 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./interfaces/IVestingWallet.sol";
 import "./RecoverableFunds.sol";
-import "./StagedCrowdsale.sol";
+import "./Stages.sol";
 
-contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
+contract CrowdSale is Pausable, RecoverableFunds {
 
     using SafeMath for uint256;
+    using Stages for Stages.Map;
 
     IERC20 public token;
     IVestingWallet public vestingWallet;
+    Stages.Map private stages;
     uint256 public price; // amount of tokens per 1 ETH
     uint256 public invested;
     uint256 public percentRate = 100;
@@ -43,7 +46,29 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
         price = newPrice;
     }
 
-    function calculateInvestmentAmounts(Stage memory stage) internal view returns (uint256, uint256) {
+    function setStage(uint256 id,uint256 start, uint256 end, uint256 bonus, uint256 minInvestmentLimit, uint256 invested, uint256 tokensSold, uint256 hardcapInTokens, uint256 vestingSchedule) public onlyOwner returns (bool) {
+        return stages.set(id, Stages.Stage(start, end, bonus, minInvestmentLimit, invested, tokensSold, hardcapInTokens, vestingSchedule));
+    }
+
+    function removeStage(uint256 id) public onlyOwner returns (bool) {
+        return stages.remove(id);
+    }
+
+    function getStage(uint256 id) public view returns (Stages.Stage memory) {
+        return stages.get(id);
+    }
+
+    function getActiveStageIndex() public view returns (bool, uint256) {
+        for (uint256 i = 0; i < stages.length(); i++) {
+            Stages.Stage storage stage = stages.get(i);
+            if (block.timestamp >= stage.start && block.timestamp < stage.end && stage.tokensSold <= stage.hardcapInTokens) {
+                return (true, i);
+            }
+        }
+        return (false, 0);
+    }
+
+    function calculateInvestmentAmounts(Stages.Stage memory stage) internal view returns (uint256, uint256) {
         // apply a bonus if any
         uint256 tokensWithoutBonus = msg.value.mul(price).div(1 ether);
         uint256 tokensWithBonus = tokensWithoutBonus;
@@ -64,8 +89,9 @@ contract CommonSale is Pausable, StagedCrowdsale, RecoverableFunds {
     }
 
     receive() external payable whenNotPaused {
-        uint256 stageIndex = getCurrentStageOrRevert();
-        Stage storage stage = stages[stageIndex];
+        (bool hasActiveStage, uint256 stageIndex) = getActiveStageIndex();
+        require(hasActiveStage, "CommonSale: No active stage found");
+        Stages.Stage storage stage = stages.get(stageIndex);
         // check min investment limit
         require(msg.value >= stage.minInvestmentLimit, "CommonSale: The amount of ETH you sent is too small");
         (uint256 tokens, uint256 investment) = calculateInvestmentAmounts(stage);
