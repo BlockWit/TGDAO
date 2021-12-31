@@ -20,7 +20,7 @@ contract CrowdSale is Pausable, RecoverableFunds {
     uint256 public price; // amount of tokens per 1 ETH
     uint256 public invested;
     uint256 public percentRate = 100;
-    address payable public wallet;
+    address payable public fundraisingWallet;
 
     function pause() public onlyOwner {
         _pause();
@@ -34,20 +34,24 @@ contract CrowdSale is Pausable, RecoverableFunds {
         token = IERC20(newTokenAddress);
     }
 
+    function setVestingWallet(address newVestingWalletAddress) public onlyOwner {
+        vestingWallet = IVestingWallet(newVestingWalletAddress);
+    }
+
     function setPercentRate(uint256 newPercentRate) public onlyOwner {
         percentRate = newPercentRate;
     }
 
-    function setWallet(address payable newWallet) public onlyOwner {
-        wallet = newWallet;
+    function setFundraisingWallet(address payable newFundraisingWalletAddress) public onlyOwner {
+        fundraisingWallet = newFundraisingWalletAddress;
     }
 
     function setPrice(uint256 newPrice) public onlyOwner {
         price = newPrice;
     }
 
-    function setStage(uint256 id,uint256 start, uint256 end, uint256 bonus, uint256 minInvestmentLimit, uint256 invested, uint256 tokensSold, uint256 hardcapInTokens, uint256 vestingSchedule) public onlyOwner returns (bool) {
-        return stages.set(id, Stages.Stage(start, end, bonus, minInvestmentLimit, invested, tokensSold, hardcapInTokens, vestingSchedule));
+    function setStage(uint256 id,uint256 start, uint256 end, uint256 bonus, uint256 minInvestmentLimit, uint256 hardcapInTokens, uint256 vestingSchedule, uint256 invested, uint256 tokensSold) public onlyOwner returns (bool) {
+        return stages.set(id, Stages.Stage(start, end, bonus, minInvestmentLimit, hardcapInTokens, vestingSchedule, invested, tokensSold));
     }
 
     function removeStage(uint256 id) public onlyOwner returns (bool) {
@@ -90,7 +94,7 @@ contract CrowdSale is Pausable, RecoverableFunds {
 
     receive() external payable whenNotPaused {
         (bool hasActiveStage, uint256 stageIndex) = getActiveStageIndex();
-        require(hasActiveStage, "CrowdSale: No active stage found");
+        require(hasActiveStage, "CrowdSale: No suitable stage found");
         Stages.Stage storage stage = stages.get(stageIndex);
         // check min investment limit
         require(msg.value >= stage.minInvestmentLimit, "CrowdSale: The amount of ETH you sent is too small");
@@ -104,7 +108,7 @@ contract CrowdSale is Pausable, RecoverableFunds {
         token.approve(address(vestingWallet), tokens);
         vestingWallet.deposit(stage.vestingSchedule, msg.sender, tokens);
         // transfer ETH
-        wallet.transfer(investment);
+        fundraisingWallet.transfer(investment);
         if (change > 0) {
             payable(msg.sender).transfer(change);
         }

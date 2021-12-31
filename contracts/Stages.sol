@@ -13,10 +13,10 @@ library Stages {
         uint256 end;
         uint256 bonus;
         uint256 minInvestmentLimit;
-        uint256 invested;
-        uint256 tokensSold;
         uint256 hardcapInTokens;
         uint256 vestingSchedule;
+        uint256 invested;
+        uint256 tokensSold;
     }
 
     struct Map {
