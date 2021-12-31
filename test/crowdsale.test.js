@@ -4,45 +4,56 @@ const { BN, ether, expectRevert } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 
 const Token = contract.fromArtifact('TGDAOToken');
-const Sale = contract.fromArtifact('CommonSale');
+const Sale = contract.fromArtifact('CrowdSale');
+const Wallet = contract.fromArtifact('VestingWallet');
 
-const [owner, ethWallet, buyer, referral] = accounts;
-const SUPPLY = 100000;
-const PRICE = 21674;
+const [owner, manager, fundraisingWallet, buyer] = accounts;
+const SUPPLY = ether('2500000');
+const PRICE = 4348;
 
-describe('CommonSale', async function () {
+describe('CrowdSale', async function () {
   let token;
   let sale;
+  let wallet;
   let STAGES;
 
   beforeEach(async function () {
     STAGES = [
       { start: await dateFromNow(1), end: await dateFromNow(8), bonus: 500, minInvestmentLimit: ether('0.03'), hardcap: ether('40000') },
-      { start: await dateFromNow(9), end: await dateFromNow(11), bonus: 0, minInvestmentLimit: ether('0.03'), hardcap: ether('60000') },
-      { start: await dateFromNow(11), end: await dateFromNow(13), bonus: 250, minInvestmentLimit: ether('0.03'), hardcap: ether('5000') }
+      { start: await dateFromNow(9), end: await dateFromNow(11), bonus: 0, minInvestmentLimit: ether('0.03'), hardcap: ether('60000') }
     ];
-    sale = await Sale.new();
-    token = await Token.new([await sale.address], [ether(String(SUPPLY))]);
-    await sale.setWallet(ethWallet);
-    await sale.setPrice(ether(String(PRICE)));
-    for (const { start, end, bonus, minInvestmentLimit, hardcap } of STAGES) {
-      await sale.addStage(start, end, bonus, minInvestmentLimit, 0, 0, hardcap, 0);
-    }
-    await sale.setToken(await token.address);
-    await sale.transferOwnership(owner);
+    sale = await Sale.new({ from: owner });
+    token = await Token.new([sale.address], [SUPPLY], { from: owner });
+    wallet = await Wallet.new({ from: owner });
+    await Promise.all([
+      wallet.setToken(token.address, { from: owner }),
+      sale.setToken(token.address, { from: owner }),
+      sale.setFundraisingWallet(fundraisingWallet, { from: owner }),
+      sale.setVestingWallet(wallet.address, { from: owner }),
+      sale.setPrice(ether(PRICE.toString()), { from: owner })
+    ]);
+    await Promise.all(STAGES.map((stage, i) => {
+      const { start, end, bonus, minInvestmentLimit, hardcap } = stage;
+      return sale.setStage(i, start, end, bonus, minInvestmentLimit, hardcap, 0, 0, 0, { from: owner });
+    }));
+    await Promise.all([
+      sale.transferOwnership(manager, { from: owner }),
+      token.transferOwnership(manager, { from: owner }),
+      wallet.transferOwnership(manager, { from: owner })
+    ]);
   });
 
   it('should not accept ETH before crowdsale start', async function () {
-    await expectRevert(sale.sendTransaction({ value: ether('1'), from: buyer }), 'StagedCrowdsale: No suitable stage found');
+    await expectRevert(sale.sendTransaction({ value: ether('1'), from: buyer }), 'CrowdSale: No suitable stage found');
   });
 
   it('should not accept ETH before crowdsale start', async function () {
-    await expectRevert(sale.sendTransaction({ value: ether('1'), from: buyer }), 'StagedCrowdsale: No suitable stage found');
+    await expectRevert(sale.sendTransaction({ value: ether('1'), from: buyer }), 'CrowdSale: No suitable stage found');
   });
 
   it('should not accept ETH below min limit', async function () {
     await increaseDateTo(STAGES[0].start);
-    await expectRevert(sale.sendTransaction({ value: ether('0.029'), from: buyer }), 'CommonSale: The amount of ETH you sent is too small.');
+    await expectRevert(sale.sendTransaction({ value: ether('0.029'), from: buyer }), 'CrowdSale: The amount of ETH you sent is too small.');
   });
 
   it('should accept ETH above min limit', async function () {
@@ -51,22 +62,19 @@ describe('CommonSale', async function () {
     const ethSent = ether('0.1');
     const { receipt: { transactionHash } } = await sale.sendTransaction({ value: ethSent, from: buyer });
     const events = await getEvents(transactionHash, token, 'Transfer', web3);
-    const tokensExpected = ethSent.muln(PRICE * (100 + bonus) / 100);
+    const tokensExpected = ethSent.muln(PRICE).muln(100 + bonus).divn(100);
     const tokensReceived = new BN(events[0].args.value);
-    const tokensLogged = (await sale.balances(0, buyer)).initial;
-    const tokensWithdrawed = (await sale.balances(0, buyer)).withdrawed;
     expect(tokensReceived).to.be.bignumber.equal(tokensExpected);
-    expect(tokensLogged).to.be.bignumber.equal(tokensExpected);
-    expect(tokensWithdrawed).to.be.bignumber.equal(tokensExpected);
   });
 
   it('should not return tokens above the hardcap', async function () {
     const { start, hardcap } = STAGES[0];
     await increaseDateTo(start);
     const ethSent = ether('99');
-    await sale.sendTransaction({ value: ethSent, from: buyer });
-    const tokensReserved = (await sale.balances(0, buyer)).initial;
-    expect(tokensReserved).to.be.bignumber.equal(hardcap);
+    const { receipt: { transactionHash } } = await sale.sendTransaction({ value: ethSent, from: buyer });
+    const events = await getEvents(transactionHash, token, 'Transfer', web3);
+    const tokensReceived = new BN(events[0].args.value);
+    expect(tokensReceived).to.be.bignumber.equal(hardcap);
   });
 
   it('should calculate change correctly', async function () {
@@ -85,7 +93,7 @@ describe('CommonSale', async function () {
 
   it('should not accept ETH between crowdsale stages', async function () {
     await increaseDateTo(STAGES[0].end);
-    await expectRevert(sale.sendTransaction({ value: ether('1'), from: buyer }), 'StagedCrowdsale: No suitable stage found');
+    await expectRevert(sale.sendTransaction({ value: ether('1'), from: buyer }), 'CrowdSale: No suitable stage found');
   });
 
   it('should accept ETH after the start of the next stage', async function () {
@@ -96,35 +104,18 @@ describe('CommonSale', async function () {
     const events = await getEvents(transactionHash, token, 'Transfer', web3);
     const tokensExpected = ethSent.muln(PRICE * (100 + bonus) / 100);
     const tokensReceived = new BN(events[0].args.value);
-    const tokensLogged = (await sale.balances(1, buyer)).initial;
-    const tokensWithdrawed = (await sale.balances(1, buyer)).withdrawed;
     expect(tokensReceived).to.be.bignumber.equal(tokensExpected);
-    expect(tokensLogged).to.be.bignumber.equal(tokensExpected);
-    expect(tokensWithdrawed).to.be.bignumber.equal(tokensExpected);
   });
 
   it('should remove stage by index correctly', async function () {
-    await sale.removeStage(1, { from: owner });
-    const stage0 = await sale.stages(0);
-    const stage1 = await sale.stages(1);
-    const stage2 = await sale.stages(2);
-    expectStagesToBeEqual(stage0, STAGES[0]);
-    expectStagesToBeEqual(stage1, STAGES[2]);
-    expectStagesToBeEqual(stage2, { start: 0, end: 0, bonus: 0, minInvestmentLimit: ether('0'), hardcap: ether('0') });
-  });
-
-  it('should remove all stages correctly', async function () {
-    await sale.deleteStages({ from: owner });
-    const stage0 = await sale.stages(0);
-    const stage1 = await sale.stages(1);
-    const stage2 = await sale.stages(2);
-    expectStagesToBeEqual(stage0, { start: 0, end: 0, bonus: 0, minInvestmentLimit: ether('0'), hardcap: ether('0') });
-    expectStagesToBeEqual(stage1, { start: 0, end: 0, bonus: 0, minInvestmentLimit: ether('0'), hardcap: ether('0') });
-    expectStagesToBeEqual(stage2, { start: 0, end: 0, bonus: 0, minInvestmentLimit: ether('0'), hardcap: ether('0') });
+    await sale.removeStage(0, { from: manager });
+    const stage1 = await sale.getStage(1);
+    expectStageToBeEqual(stage1, STAGES[1]);
+    await expectRevert(sale.getStage(0), 'Stages.Map: nonexistent key');
   });
 });
 
-function expectStagesToBeEqual (actual, expected) {
+function expectStageToBeEqual (actual, expected) {
   expect(actual.start).to.be.bignumber.equal(new BN(expected.start));
   expect(actual.end).to.be.bignumber.equal(new BN(expected.end));
   expect(actual.bonus).to.be.bignumber.equal(new BN(expected.bonus));

@@ -84,7 +84,7 @@ library Stages {
      */
     function get(Map storage map, uint256 key) internal view returns (Stage storage) {
         Stage storage value = map._values[key];
-        require(contains(map, key), "Vesting.Map: nonexistent key");
+        require(contains(map, key), "Stages.Map: nonexistent key");
         return value;
     }
 
