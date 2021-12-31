@@ -90,12 +90,12 @@ contract CrowdSale is Pausable, RecoverableFunds {
 
     receive() external payable whenNotPaused {
         (bool hasActiveStage, uint256 stageIndex) = getActiveStageIndex();
-        require(hasActiveStage, "CommonSale: No active stage found");
+        require(hasActiveStage, "CrowdSale: No active stage found");
         Stages.Stage storage stage = stages.get(stageIndex);
         // check min investment limit
-        require(msg.value >= stage.minInvestmentLimit, "CommonSale: The amount of ETH you sent is too small");
+        require(msg.value >= stage.minInvestmentLimit, "CrowdSale: The amount of ETH you sent is too small");
         (uint256 tokens, uint256 investment) = calculateInvestmentAmounts(stage);
-        require(tokens > 0, "CommonSale: No tokens available for purchase");
+        require(tokens > 0, "CrowdSale: No tokens available for purchase");
         uint256 change = msg.value.sub(investment);
         // update stats
         invested = invested.add(investment);

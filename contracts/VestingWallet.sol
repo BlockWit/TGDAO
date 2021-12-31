@@ -55,7 +55,7 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
     }
 
     function addBalances(uint256 schedule, address[] calldata addresses, uint256[] calldata amounts) public onlyOwner {
-        require(addresses.length == amounts.length, "MultiWallet: Incorrect array length.");
+        require(addresses.length == amounts.length, "VestingWallet: Incorrect array length.");
         for (uint256 i = 0; i < addresses.length; i++) {
             Balance storage balance = balances[schedule][addresses[i]];
             balance.initial = balance.initial.add(amounts[i]);
@@ -96,7 +96,7 @@ contract VestingWallet is Ownable, Pausable, RecoverableFunds {
             balance.withdrawn = balance.withdrawn.add(vestedAmount);
             tokens = tokens.add(vestedAmount);
         }
-        require(tokens > 0, "MultiWallet: No tokens available for withdrawal");
+        require(tokens > 0, "VestingWallet: No tokens available for withdrawal");
         token.transfer(msg.sender, tokens);
         emit Withdrawal(msg.sender, tokens);
         return tokens;
