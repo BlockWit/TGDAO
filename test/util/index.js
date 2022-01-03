@@ -1,6 +1,6 @@
 const { time } = require('@openzeppelin/test-helpers');
 const { toBN } = require('web3-utils');
-const {contract} = require("@openzeppelin/test-environment");
+const { contract } = require('@openzeppelin/test-environment');
 
 // This decodes logs for a single event type, and returns a decoded object in
 // the same form truffle-contract uses on its receipts
@@ -59,8 +59,8 @@ async function getTransactionCost (hash, web3) {
  * @param days - number of days from current date
  * @returns {promise} - Unix TimeStamp in seconds
  */
-async function dateFromNow(days) {
-  return (await time.latest()).addn(days * 24 * 3600).toNumber()
+async function dateFromNow (days) {
+  return (await time.latest()).addn(days * 24 * 3600).toNumber();
 }
 
 /**
@@ -68,8 +68,8 @@ async function dateFromNow(days) {
  * @param timestamp
  * @returns {Promise<void>}
  */
-async function increaseDateTo(timestamp) {
-  if (await time.latest() < timestamp) await time.increaseTo(timestamp)
+async function increaseDateTo (timestamp) {
+  if (await time.latest() < timestamp) await time.increaseTo(timestamp);
 }
 
 function isWeb3Contract (contract) {
@@ -90,11 +90,10 @@ async function getEvents (txHash, emitter, eventName, web3) {
  * @param artifact path to artifact
  * @returns {object} contract
  */
-function fromArtifact(artifact) {
+function fromArtifact (artifact) {
   const { abi, bytecode } = require(artifact);
   return contract.fromABI(abi, bytecode);
 }
-
 
 module.exports = {
   fromArtifact,
@@ -102,4 +101,4 @@ module.exports = {
   getTransactionCost,
   dateFromNow,
   increaseDateTo
-}
+};
