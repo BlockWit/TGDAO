@@ -8,8 +8,8 @@
 * [Obtaining the ABI interface](#obtaining-the-abi-interface)
 * [How to read contract information using BscScan](#how-to-read-contract-information-using-BscScan)
 * [Calling function](#calling-function)
-* [How to set price in the CommonSale smart contract](#How-to-set-price-in-the-CommonSale-smart-contract)
-* [How to update stage parameters in the CommonSale smart contract](#How-to-update-stage-parameters-in-the-CommonSale-smart-contract)
+* [How to set price in the CrowdSale smart contract](#How-to-set-price-in-the-CrowdSale-smart-contract)
+* [How to update stage parameters in the CrowdSale smart contract](#How-to-update-stage-parameters-in-the-CrowdSale-smart-contract)
 * [Pausable](#pausable)
 
 ## Overview
@@ -96,7 +96,7 @@ The first steps are similar to those described in the section [Obtaining the ABI
     </details>
 
 
-## How to set price in the CommonSale smart contract
+## How to set price in the CrowdSale smart contract
 The final price that users pay when buying tokens is calculated from the following two parameters:
 1) `Base price`. Common to all stages of the sale.
 2) `Bonus in %`, which is applied to the number of tokens received upon purchase. Set separately for each stage of the sale.
@@ -117,13 +117,13 @@ The value in cell `J4` is calculated automatically from the value of the `BNB_US
 
 3. Click `Write` button and then click `Confirm` button, as described in step 7 of the [Calling function](#calling-function) section.
 
-## How to update stage parameters in the CommonSale smart contract
+## How to update stage parameters in the CrowdSale smart contract
 Each stage of the sale is configured with the following parameters:
 1) `id` - zero-based (the first stage has index `0`) index of stage. Use this value to select the exact stage you want to edit.
 2) `start` - unix timestamp (in seconds) of the start of the stage.
 3) `end` - unix timestamp (in seconds) of the end of the stage.
 4) `bonus` - the `Base price` value is the amount of tokens that user gets for 1 BNB.
-5) `minInvestmentLimit` - the mininum amount of `Wei` that user should send to the `CommonSale` contract to buy tokens.
+5) `minInvestmentLimit` - the mininum amount of `Wei` that user should send to the `CrowdSale` contract to buy tokens.
 6) `hardcapInTokens` - the maximum amount of tokens that can be sold during the stage.
 7) `vestingSchedule` - the `id` of the vesting schedule applied to this stage. Set `0` if no vesting schedule is required.
    
@@ -141,7 +141,7 @@ The value in columns `M` - `Q` are automatically calculated from values set in c
 3. Click `Write` button and then click `Confirm` button, as described in step 7 of the [Calling function](#calling-function) section.
 
 ## Pausable
-CommonSale and TGDAOToken contracts inherit from OpenZeppelin's Pausable, which implements an emergency stop mechanism that can be triggered by an authorized account.  
+CrowdSale inherit from OpenZeppelin's Pausable, which implements an emergency stop mechanism that can be triggered by an authorized account.  
 In case of emergency, use the `Pause` function to prohibit users from performing any actions with the smart contract.  
 `Unpause` returns the contract to its normal state.
 1. Follow steps 1-6 of the [Calling function](#calling-function) section.
