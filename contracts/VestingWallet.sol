@@ -7,8 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./RecoverableFunds.sol";
 import "./Schedules.sol";
+import "./interfaces/IVestingWallet.sol";
 
-contract VestingWallet is Ownable, RecoverableFunds {
+contract VestingWallet is IVestingWallet, Ownable, RecoverableFunds {
 
     using SafeMath for uint256;
     using Schedules for Schedules.Map;
@@ -45,7 +46,7 @@ contract VestingWallet is Ownable, RecoverableFunds {
         balances[schedule][account] = Balance(initial, withdrawn);
     }
 
-    function deposit(uint256 schedule, address[] calldata beneficiaries, uint256[] calldata amounts) public {
+    function deposit(uint256 schedule, address[] calldata beneficiaries, uint256[] calldata amounts) public override {
         require(beneficiaries.length == amounts.length, "VestingWallet: Incorrect array length.");
         uint256 sum;
         for (uint256 i = 0; i < amounts.length; i++) {
@@ -57,7 +58,7 @@ contract VestingWallet is Ownable, RecoverableFunds {
         }
     }
 
-    function deposit(uint256 schedule, address beneficiary, uint256 amount) public {
+    function deposit(uint256 schedule, address beneficiary, uint256 amount) public override {
         token.transferFrom(msg.sender, address(this), amount);
         _deposit(schedule, beneficiary, amount);
     }
