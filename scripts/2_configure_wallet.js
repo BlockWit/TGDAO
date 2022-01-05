@@ -1,0 +1,61 @@
+const Wallet = artifacts.require('VestingWallet');
+const { logger } = require('./util');
+const { ether, time: { duration: { days, seconds } } } = require('@openzeppelin/test-helpers');
+
+async function deploy () {
+  const args = process.argv.slice(2);
+  const TOKEN_ADDRESS = args[args.findIndex(argName => argName === '--token') + 1];
+  const WALLET_ADDRESS = args[args.findIndex(argName => argName === '--wallet') + 1];
+
+  const DAY_0 = seconds(Math.floor(new Date('Jan 12 2022 12:00:00 UTC') / 1000).toString());
+
+  /* eslint-disable no-multi-spaces */
+  const VESTING_SCHEDULES = [
+    { id: 0,  start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') },
+    { id: 1,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
+    { id: 2,  start: DAY_0.add(days('60')),   duration: days('360'), interval: days('30') },
+    { id: 3,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
+    { id: 4,  start: DAY_0.add(days('60')),   duration: days('450'), interval: days('30') },
+    { id: 5,  start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') },
+    { id: 6,  start: DAY_0.sub(days('30')),   duration: days('150'), interval: days('30') },
+    { id: 7,  start: DAY_0,                       duration: days('360'), interval: days('30') },
+    { id: 8,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
+    { id: 9,  start: DAY_0,                       duration: days('360'), interval: days('30') },
+    { id: 10, start: DAY_0,                       duration: days('540'), interval: days('30') },
+    { id: 11, start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') },
+    { id: 12, start: DAY_0,                       duration: days('360'), interval: days('30') },
+    { id: 13, start: DAY_0.add(days('60')),   duration: days('720'), interval: days('30') },
+    { id: 14, start: DAY_0.add(days('150')),  duration: days('720'), interval: days('30') }
+  ];
+  /* eslint-enable no-multi-spaces */
+
+  const { log } = logger(await web3.eth.net.getNetworkType());
+  const [deployer] = await web3.eth.getAccounts();
+
+  const wallet = await Wallet.at(WALLET_ADDRESS);
+
+  {
+    log(`Wallet. Set token.`);
+    const tx = await wallet.setToken(TOKEN_ADDRESS, { from: deployer });
+    log(`Result: successful tx: @tx{${tx.receipt.transactionHash}}`);
+  }
+
+  log(`Wallet. Set vesting schedules.`);
+  for (const { id, start, duration, interval } of VESTING_SCHEDULES) {
+    log(`Schedule #${id}`);
+    const tx = await wallet.setVestingSchedule(id, start, duration, interval, { from: deployer });
+    log(`Result: successful tx: @tx{${tx.receipt.transactionHash}}`);
+  }
+}
+
+module.exports = async function main (callback) {
+  try {
+    await deploy();
+    console.log('success');
+    callback(null);
+  } catch (e) {
+    console.log('error');
+    console.log(e);
+    callback(e);
+  }
+};
