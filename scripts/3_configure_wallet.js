@@ -11,21 +11,20 @@ async function deploy () {
 
   /* eslint-disable no-multi-spaces */
   const VESTING_SCHEDULES = [
-    { id: 0,  start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') },
-    { id: 1,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
-    { id: 2,  start: DAY_0.add(days('60')),   duration: days('360'), interval: days('30') },
-    { id: 3,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
-    { id: 4,  start: DAY_0.add(days('60')),   duration: days('450'), interval: days('30') },
-    { id: 5,  start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') },
-    { id: 6,  start: DAY_0.sub(days('30')),   duration: days('150'), interval: days('30') },
-    { id: 7,  start: DAY_0,                       duration: days('360'), interval: days('30') },
-    { id: 8,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
-    { id: 9,  start: DAY_0,                       duration: days('360'), interval: days('30') },
-    { id: 10, start: DAY_0,                       duration: days('540'), interval: days('30') },
-    { id: 11, start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') },
-    { id: 12, start: DAY_0,                       duration: days('360'), interval: days('30') },
-    { id: 13, start: DAY_0.add(days('60')),   duration: days('720'), interval: days('30') },
-    { id: 14, start: DAY_0.add(days('150')),  duration: days('720'), interval: days('30') }
+    { id: 0,  start: DAY_0,                       duration: days('0'),   interval: days('0')  },
+    { id: 1,  start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') }, // round A
+    { id: 2,  start: DAY_0.add(days('60')),   duration: days('360'), interval: days('30') }, // round B
+    { id: 3,  start: DAY_0.add(days('60')),   duration: days('450'), interval: days('30') }, // round C
+    { id: 4,  start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') }, // round D
+    { id: 5,  start: DAY_0.sub(days('30')),   duration: days('150'), interval: days('30') }, // public sale
+    { id: 6,  start: DAY_0,                       duration: days('360'), interval: days('30') }, // airdrop
+    { id: 7,  start: DAY_0,                       duration: days('0'),   interval: days('0')  }, // liquidity
+    { id: 8,  start: DAY_0,                       duration: days('360'), interval: days('30') }, // farming
+    { id: 9,  start: DAY_0,                       duration: days('540'), interval: days('30') }, // marketing
+    { id: 10, start: DAY_0.add(days('150')),  duration: days('360'), interval: days('30') }, // advisors
+    { id: 11, start: DAY_0,                       duration: days('360'), interval: days('30') }, // launch team
+    { id: 12, start: DAY_0.add(days('60')),   duration: days('720'), interval: days('30') }, // dev team
+    { id: 13, start: DAY_0.add(days('150')),  duration: days('720'), interval: days('30') }  // reserve
   ];
   /* eslint-enable no-multi-spaces */
 
