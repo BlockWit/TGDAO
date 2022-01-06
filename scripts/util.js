@@ -47,4 +47,19 @@ async function timeout (ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-module.exports = { logger, timeout };
+function fromCSV (filename) {
+  const file = fs.readFileSync(filename, 'utf-8');
+  const lines = file.split(/\r\n|\n/);
+  const entries = lines.map(line => line.split(','));
+  const result = {
+    addresses: [],
+    balances: []
+  };
+  entries.forEach(([address, balance]) => {
+    result.addresses.push(address);
+    result.balances.push(balance);
+  });
+  return result;
+}
+
+module.exports = { fromCSV, logger, timeout };

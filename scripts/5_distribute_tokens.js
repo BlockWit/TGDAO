@@ -1,6 +1,7 @@
 const TokenDepositor = artifacts.require('TokenDepositor');
 const { ether } = require('@openzeppelin/test-helpers');
-const { logger } = require('./util');
+const { fromCSV, logger } = require('./util');
+const fs = require('fs');
 
 async function deploy () {
   const args = process.argv.slice(2);
@@ -83,12 +84,11 @@ async function deploy () {
     log(`Result: successful tx: @tx{${tx.receipt.transactionHash}}`);
   }
   {
-    log(`Depositor. Round B.`);
+    log(`Depositor. Round B. AVG`);
     const unlocked = 5;
     const schedule = 2;
-    const addresses = [];
-    const balances = [];
-    const tx = await depositor.deposit(unlocked, schedule, addresses, balances, { from: deployer });
+    const { addresses, balances } = fromCSV('distribution/investors_b1_avg.csv');
+    const tx = await depositor.deposit(unlocked, schedule, addresses, balances.map(ether), { from: deployer });
     log(`Result: successful tx: @tx{${tx.receipt.transactionHash}}`);
   }
 }
