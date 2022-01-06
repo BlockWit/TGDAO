@@ -3,7 +3,7 @@ const TokenDepositor = artifacts.require('TokenDepositor');
 const Sale = artifacts.require('CrowdSale');
 const Wallet = artifacts.require('VestingWallet');
 const { logger } = require('./util');
-const { toWei } = web3.utils;
+const { ether } = require('@openzeppelin/test-helpers');
 
 async function deploy () {
   const { log } = logger(await web3.eth.net.getNetworkType());
@@ -18,7 +18,7 @@ async function deploy () {
   const depositor = await TokenDepositor.new({ from: deployer });
   log(`Depositor deployed: @address{${depositor.address}}`);
 
-  const token = await Token.new([depositor.address], toWei('1000000000', 'ether'), { from: deployer });
+  const token = await Token.new([depositor.address], [ether('1000000000')], { from: deployer });
   log(`Token deployed: @address{${token.address}}`);
 }
 
