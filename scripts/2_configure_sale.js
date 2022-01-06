@@ -9,7 +9,7 @@ async function deploy () {
   const WALLET_ADDRESS = args[args.findIndex(argName => argName === '--wallet') + 1];
 
   const PRICE = '23562485996631';
-  const FUNDRAISING_WALLET = '0x67B8CAF85C727A27935570Caf0e62f265c0d95ff';
+  const FUNDRAISING_WALLET = '0xa5508bA6FCe6F539200ba5c0d15AEa4f52150d6D';
   const STAGE = {
     id: 0,
     start: 1641988800,
