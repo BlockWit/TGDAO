@@ -6,9 +6,8 @@
 * _[Name](https://github.com/binance-chain/BEPs/blob/master/BEP20.md#5111-name)_            : TGDAO
 * _[Ticker](https://github.com/binance-chain/BEPs/blob/master/BEP20.md#5112-symbol)_          : TGDAO
 * _[Decimals](https://github.com/binance-chain/BEPs/blob/master/BEP20.md#5113-decimals)_        : 18
-* _Emission_        : One-time, 30 000 000 tokens
-* _Fiat dependency_ : No, Changable by owner
-* _Token offers_    : 4
+* _Emission_        : One-time, 1000 000 000 tokens
+* _Fiat dependency_ : No
 * _Token locks_     : Yes
 
 ## Smart contracts description
@@ -16,24 +15,10 @@
 TGDAO smart-contract
 
 ### Contracts
-1. _Configurator_
-2. _CandaoToken_ - Token contract
-3. _Sale_ - Sale contract
-
-### Token distribution
-1. _Company Reserve_: 2 400 000 (Lock for 6 month on VestingWallet)
-2. _Launch team_: 2 250 000 (Unlock 10% monthly after 3 months on VestingWallet)
-3. _Development team_: 2 250 000 (Unlock 2.5% monthly after 3 months on VestingWallet)
-4. _Liquidity_: 3 000 000
-5. _Farming_: 600 000
-6. _Marketing_ 4 500 000 (lock for 6 month on VestingWallet)
-7. _Advisors_ 1 000 000 (Unlock 10% monthly after 3 months on VestingWallet)
-8. _AirDrop_ 250 000
-9. _Seed round_ 3 750 000 (Unlock 10% monthly after 3 months on VestingWallet)
-10. _Funds round_ 3 500 000 (Unlock 10% monthly after 3 months on VestingWallet)
-11. _Public partners round_ 500 000
-12. _Public sale_ 3 000 000
-13. _Swap fund_ 3 000 000
+1. _TGDAOToken_- Token contract
+2. _CrowdSale_ - Sale contract
+3. _VestingWallet_ - Wallet contract
+4. _TokenDepositor_ - Token distributor
 
 ### How to work with this project
 #### To start working with the contracts, please, follow theese steps for each contract:
@@ -71,42 +56,10 @@ EXODUS does not support BEP20, but provides the ability to export the private ke
 ## Main network configuration
 
 ### Contracts
-* [TGDAOToken](https://bscscan.com/token/0x29b85171Be5F4883Cbe2E287eE0b4FC8B718cbC5)
-* [Sale](https://bscscan.com/address/0x62d228B8EE9F88f79Fd9f6B4A31AA47B12814f30#readContract)
-* Wallets
-  * [Company reserve](https://bscscan.com/address/0x105BA88d735ff5aeFA6f8d3dBC9Fe844497f38cF#readContract)
-  * [Launch team](https://bscscan.com/address/0x1bFE47e6359b598978f6Ae892Fa499D6D3cC1445#readContract)
-  * [Development team]( https://bscscan.com/address/0x287F3620d166F100728e51C2A329CCCaF47a3E4a#readContract)
-  * [Marketing](https://bscscan.com/address/0xa00264b29a25618175ae27e1c0ff561b75c804fd#readContract)
-  * [Advisors](https://bscscan.com/address/0x5a9eDa4FAc0CeF4D92E7561c61dB12F72A12D243#readContract)
-  * [Seed round](https://bscscan.com/address/0x813F3C5f1d63782Ff2E6d464228646729c2D4119#readContract)
-
-### Sale stages
-Base price                          : 3500 TGDAO per BNB
-
-#### Stage 1 - Funds Round 
-* Bonus                             : 200% (price with bonus - 10500 TGDAO per BNB)
-* HardCap                           : 3 500 000 TGDAO
-* Start date                        : 15.10.2021
-* End date                          : 25.10.2021
-* Min investment                    : 23.786 BNB
-* Vesting schedule                  : Tokens remain on the sale contract after the purchase and can be withdrawn from the contract in accordance with the following vesting schedule: 10% every month after 3 months.
-
-#### Stage 2 - Public Partners Round
-* Bonus                             : 50% (price with bonus - 5250 TGDAO per BNB)
-* HardCap                           : 500 000 TGDAO
-* Start date                        : 25.10.2021
-* End date                          : 26.10.2021
-* Min investment                    : 23.786 BNB
-* Vesting schedule                  : Not available. All purchased tokens are transferred to the user immediately
-
-#### Stage 3 - Public Sale Round
-* Bonus                             : 0% (price with bonus - 3500 TGDAO per BNB)
-* HardCap                           : 6 000 000 TGDAO
-* Start date                        : 12.11.2021
-* End date                          : 19.11.2021
-* Min investment                    : 23.786 BNB
-* Vesting schedule                  : Not available. All purchased tokens are transferred to the user immediately
+* [TGDAOToken](https://bscscan.com/address/0xa1dCC3689EB48909b3b21F4932dD53Ec533dFAF8#token)
+* [CrowdSale](https://bscscan.com/address/0xD076366c8DbCfaba1E8F672D66234CD060A5fC71#code)
+* [VestingWallet](https://bscscan.com/address/0x4D1CeBBDb249576988f915D4a528630240ac6906#code)
+* [TokenDepositor](https://bscscan.com/address/0x148f5f267241d32c14082fadaf3bb5d8f29a505f#code)
 
 ## Test network configuration (BSC Testnet)
 You can find test log [here](docs/bsctestnet.log.md)
