@@ -8,7 +8,7 @@ async function deploy () {
   const TOKEN_ADDRESS = args[args.findIndex(argName => argName === '--token') + 1];
   const WALLET_ADDRESS = args[args.findIndex(argName => argName === '--wallet') + 1];
 
-  const PRICE = '23562485996631';
+  const PRICE = ether('38486');
   const FUNDRAISING_WALLET = '0xa5508bA6FCe6F539200ba5c0d15AEa4f52150d6D';
   const STAGE = {
     id: 0,
@@ -16,8 +16,8 @@ async function deploy () {
     end: 1642593600,
     bonus: 0,
     minInvestmentLimit: ether('5857'),
-    hardcap: ether('2500000'),
-    vestingSchedule: 6
+    hardcap: ether('25000000'),
+    vestingSchedule: 5
   };
 
   const { log } = logger(await web3.eth.net.getNetworkType());
@@ -42,7 +42,7 @@ async function deploy () {
   }
   {
     log(`CrowdSale. set price.`);
-    const tx = await sale.setPrice(ether(PRICE), { from: deployer });
+    const tx = await sale.setPrice(PRICE, { from: deployer });
     log(`Result: successful tx: @tx{${tx.receipt.transactionHash}}`);
   }
   {

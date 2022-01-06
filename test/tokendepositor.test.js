@@ -73,6 +73,8 @@ describe('VestingWallet', async () => {
             expect(initial2).to.be.bignumber.equal(initial1);
             expect(balance).to.be.bignumber.equal(vested1).and.equal(withdrawn2);
             expect(vested2).to.be.bignumber.equal(new BN('0'));
+          } else {
+            await expectRevert(wallet.withdraw({ from: address }), 'VestingWallet: No tokens available for withdrawal');
           }
         }));
       }

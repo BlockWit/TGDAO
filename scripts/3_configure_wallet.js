@@ -1,6 +1,6 @@
 const Wallet = artifacts.require('VestingWallet');
 const { logger } = require('./util');
-const { ether, time: { duration: { days, seconds } } } = require('@openzeppelin/test-helpers');
+const { time: { duration: { days, seconds } } } = require('@openzeppelin/test-helpers');
 
 async function deploy () {
   const args = process.argv.slice(2);

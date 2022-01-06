@@ -1,4 +1,5 @@
 const Token = artifacts.require('TGDAOToken');
+const TokenDepositor = artifacts.require('TokenDepositor');
 const Sale = artifacts.require('CrowdSale');
 const Wallet = artifacts.require('VestingWallet');
 const { logger } = require('./util');
@@ -8,7 +9,7 @@ async function deploy () {
   const { log } = logger(await web3.eth.net.getNetworkType());
   const [deployer] = await web3.eth.getAccounts();
 
-  const token = await Token.new([deployer], toWei('100000000', 'ether'), { from: deployer });
+  const token = await Token.new([deployer], toWei('1000000000', 'ether'), { from: deployer });
   log(`Token deployed: @address{${token.address}}`);
 
   const wallet = await Wallet.new({ from: deployer });
@@ -16,6 +17,9 @@ async function deploy () {
 
   const sale = await Sale.new({ from: deployer });
   log(`Sale deployed: @address{${sale.address}}`);
+
+  const depositor = await TokenDepositor.new({ from: deployer });
+  log(`Depositor deployed: @address{${depositor.address}}`);
 }
 
 module.exports = async function main (callback) {
