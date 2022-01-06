@@ -15,6 +15,10 @@ contract TokenDepositor is RecoverableFunds {
     IERC20 public token;
     IVestingWallet public vestingWallet;
 
+    function setToken(address newTokenAddress) public onlyOwner {
+        token = IERC20(newTokenAddress);
+    }
+
     function setVestingWallet(address newVestingWalletAddress) public onlyOwner {
         vestingWallet = IVestingWallet(newVestingWalletAddress);
     }
