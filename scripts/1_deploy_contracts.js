@@ -9,9 +9,6 @@ async function deploy () {
   const { log } = logger(await web3.eth.net.getNetworkType());
   const [deployer] = await web3.eth.getAccounts();
 
-  const token = await Token.new([deployer], toWei('1000000000', 'ether'), { from: deployer });
-  log(`Token deployed: @address{${token.address}}`);
-
   const wallet = await Wallet.new({ from: deployer });
   log(`Wallet deployed: @address{${wallet.address}}`);
 
@@ -20,6 +17,9 @@ async function deploy () {
 
   const depositor = await TokenDepositor.new({ from: deployer });
   log(`Depositor deployed: @address{${depositor.address}}`);
+
+  const token = await Token.new([depositor.address], toWei('1000000000', 'ether'), { from: deployer });
+  log(`Token deployed: @address{${token.address}}`);
 }
 
 module.exports = async function main (callback) {
