@@ -56,7 +56,7 @@ EXODUS does not support BEP20, but provides the ability to export the private ke
 ## Main network configuration
 
 ### Contracts
-* [TGDAOToken](https://bscscan.com/token/0xa1dCC3689EB48909b3b21F4932dD53Ec533dFAF8)
+* [TGDAOToken](https://bscscan.com/token/0x46F275321107d7c49cF80216371AbF1a1599c36F)
 * [CrowdSale](https://bscscan.com/address/0xD076366c8DbCfaba1E8F672D66234CD060A5fC71#code)
 * [VestingWallet](https://bscscan.com/address/0x4D1CeBBDb249576988f915D4a528630240ac6906#code)
 * [TokenDepositor](https://bscscan.com/address/0x148f5f267241d32c14082fadaf3bb5d8f29a505f#code)
