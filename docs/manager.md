@@ -104,8 +104,8 @@ The final price that users pay when buying tokens is calculated from the followi
 > Attention! The `Base price` value is the amount of tokens that user receives for 1 BNB.
 
 In the case when you need to adjust the BNB price of a token relative to its price in USD, we recommend using the `setPrice` function.  
-Please, use the `Stages` tab of the `TGDAO` spreadsheet. You can find the parameter value that needs to be passed to the `setPrice` function in cell `J4`.  
-The value in cell `J4` is calculated automatically from the value of the `BNB_USD` currency pair, which is regularly updated via `GOOGLEFINANCE`.
+Please, use the `Config` tab of the `TGDAO` spreadsheet. You can find the parameter value that needs to be passed to the `setPrice` function in cell `B8`.  
+The value in cell `B8` is calculated automatically from the value of the `BNB_USD` currency pair, which is regularly updated via `GOOGLEFINANCE`.
 
 1. Follow steps 1-6 of the [Calling function](#calling-function) section.
 2. Fill `newPrice` field.
