@@ -53,16 +53,20 @@
 * Depositor. Airdrop.
   Result: successful tx: https://bscscan.com/tx/0xd02b5af5b13f5bd4092a6999fe4dbe8c4dd305c8f8231ad1f5c45a27d2b24359
 * Depositor. Locked Liquidity.
-  Result: successful tx: https://etherscan.io/tx/0xef79286b2af4c3e77f790cdf35e39727d6d5e9ce3f5e1061026f6544dcdd0126
+  Result: successful tx: https://bscscan.com/tx/0xef79286b2af4c3e77f790cdf35e39727d6d5e9ce3f5e1061026f6544dcdd0126
 * Depositor. Staking and Farming.
   Result: successful tx: https://bscscan.com/tx/0x6e08dbc8eda8ba79ff101874565a22e20d12db39e1ae1103e71f2b61637614fd
 * Depositor. Marketing.
-  Result: successful tx: https://etherscan.io/tx/0xcd7a1e12cbfbfa4028f372eaf5566958e91b371a568b738cfe24aebe8265793f
+  Result: successful tx: https://bscscan.com/tx/0xcd7a1e12cbfbfa4028f372eaf5566958e91b371a568b738cfe24aebe8265793f
 * Depositor. Advisors.
-  Result: successful tx: https://etherscan.io/tx/0x8cdf1d582df238eb9b491fd706fe366953b4e2eaac913f313f3099b53af059cf
+  Result: successful tx: https://bscscan.com/tx/0x8cdf1d582df238eb9b491fd706fe366953b4e2eaac913f313f3099b53af059cf
 * Depositor. Launch Team.
-  Result: successful tx: https://etherscan.io/tx/0x1b69fef626533bbc6a9c7731f6770094e8403d8c6a9bb53864791e4ea2ff85f1
+  Result: successful tx: https://bscscan.com/tx/0x1b69fef626533bbc6a9c7731f6770094e8403d8c6a9bb53864791e4ea2ff85f1
 * Depositor. Development Team.
-  Result: successful tx: https://etherscan.io/tx/0xf01609c05f0eb786dcf03e22dcd2d0d0b202954796735d6ed56560fa1a7dfdc1
+  Result: successful tx: https://bscscan.com/tx/0xf01609c05f0eb786dcf03e22dcd2d0d0b202954796735d6ed56560fa1a7dfdc1
 * Depositor. Reserves.
-  Result: successful tx: https://etherscan.io/tx/0x0831ab26564d58929612b390b8f8192c7cc7102867fb557334694b27fb0fe883
+  Result: successful tx: https://bscscan.com/tx/0x0831ab26564d58929612b390b8f8192c7cc7102867fb557334694b27fb0fe883
+* Depositor. Round A
+  Result: successful tx: https://bscscan.com/tx/0x1ab86446d5a570b78e4facf7f4edc7902be5a2a989165642d7ff79fc10409a61
+* Depositor. Round D
+  Result: successful tx: https://bscscan.com/tx/0x4336ba4a1da70b04bf0809e4c768b5a7f20df580ce993e78550cb04622970137
