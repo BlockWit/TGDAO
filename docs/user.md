@@ -105,10 +105,25 @@ At any time you can find out your balance and the amount already withdrawn from 
 
 </details><br>
 
-1. Go to the [Read Contract](https://bscscan.com) tab of the sale smart contract.
+1. Go to the [Read Contract](https://bscscan.com/address/0x4D1CeBBDb249576988f915D4a528630240ac6906#readContract) tab of the sale smart contract.
 2. Find the section `Balances`
 3. Enter the number of the stage of the sale during which the purchase was made and enter your address in the BSC network.
 4. Click the `Query` button
+
+## AccountInfo
+[VestingWallet](https://bscscan.com/address/0x4D1CeBBDb249576988f915D4a528630240ac6906#code) has the method called `getAccountInfo` to make it easier for the user to obtain information on the vested amount.  
+<details><summary>Click to see screenshot</summary>
+
+![balances](images/obtaining_account_info.png)
+
+</details><br>
+
+1. Enter your address in the `account` field
+2. Click the `Query` button
+3. Method returns three values:
+   * the initial number of tokens locked on this contract
+   * the number of tokens withdrawn
+   * the number of tokens available for withdrawal at the moment
 
 ## Withdrawal
 In order to receive vested tokens, You need to call the `withdraw` method of the [VestingWallet](https://bscscan.com/address/0x4D1CeBBDb249576988f915D4a528630240ac6906#code) smart contract.
