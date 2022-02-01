@@ -4,12 +4,15 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./RecoverableFunds.sol";
 
 /**
  * @dev TGDAO Staking
  */
 contract TGDAOStaking is RecoverableFunds {
+
+    using SafeMath for uint256;
 
     uint public PERCENT_DIVIDER = 100;
 
@@ -173,20 +176,20 @@ contract TGDAOStaking is RecoverableFunds {
 
         staker.closed[stakeIndex] = true;
         uint startTimestamp =  staker.start[stakeIndex];
-        if(block.timestamp >= startTimestamp + stakeType.periodInDays * (1 days)) {
-            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex]*(PERCENT_DIVIDER + stakeType.apy)/PERCENT_DIVIDER;
+        if(block.timestamp >= startTimestamp.add(stakeType.periodInDays.mul(1 days))) {
+            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex].mul(PERCENT_DIVIDER + stakeType.apy).div(PERCENT_DIVIDER);
         } else {
             uint stakePeriodIndex = stakeType.finesPeriodsCount - 1;
             for(uint i = stakeType.finesPeriodsCount; i > 0; i--) {
-                if(block.timestamp < startTimestamp + stakeType.fineDays[i - 1] * (1 days)) {
+                if(block.timestamp < startTimestamp.add(stakeType.fineDays[i - 1].mul(1 days))) {
                     stakePeriodIndex = i - 1;
                 }
             }
-            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex]*(PERCENT_DIVIDER - stakeType.fines[stakePeriodIndex])/PERCENT_DIVIDER;
+            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex].mul(PERCENT_DIVIDER - stakeType.fines[stakePeriodIndex]).div(PERCENT_DIVIDER);
         }
         require(token.balanceOf(address(this)) >= staker.amountAfter[stakeIndex], "Staking contract does not have enough funds! Owner should deposit funds...");
 
-        staker.summerAfter += staker.amountAfter[stakeIndex];
+        staker.summerAfter = staker.summerAfter.add(staker.amountAfter[stakeIndex]);
         staker.finished[stakeIndex] = block.timestamp;
 
         require(token.transfer(_msgSender(), staker.amountAfter[stakeIndex]), "Can't transfer reward");
