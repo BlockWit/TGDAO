@@ -113,13 +113,17 @@ contract TGDAOStaking is RecoverableFunds {
         StakeType storage stakeType = stakeTypes[stakeTypeIndex];
         stakeType.finesPeriodsCount = fines.length;
         for(uint i=0; i<fines.length; i++) {
+            require(fines[i] <= 1000, "Fines can't be more than 1000");
             stakeType.fines[i] = fines[i];
+            require(fineDays[i] <= 100000, "Fine days can't be more than 10000");
             stakeType.fineDays[i] = fineDays[i];
         }
     }
 
     function changeStakeType(uint stakeTypeIndex, bool active, uint periodInDays, uint apy) public onlyOwner {
         require(stakeTypeIndex < countOfStakeTypes, "Wrong stake type index");
+        require(apy < 1000, "Apy can't be grater than 1000");
+        require(periodInDays < 100000, "Apy can't be grater than 100000");
         StakeType storage stakeType = stakeTypes[stakeTypeIndex];
         stakeType.active = active;
         stakeType.periodInDays = periodInDays;
@@ -176,12 +180,12 @@ contract TGDAOStaking is RecoverableFunds {
 
         staker.closed[stakeIndex] = true;
         uint startTimestamp =  staker.start[stakeIndex];
-        if(block.timestamp >= startTimestamp.add(stakeType.periodInDays.mul(1 days))) {
+        if(block.timestamp >= startTimestamp + stakeType.periodInDays * (1 days)) {
             staker.amountAfter[stakeIndex] = staker.amount[stakeIndex].mul(PERCENT_DIVIDER + stakeType.apy).div(PERCENT_DIVIDER);
         } else {
             uint stakePeriodIndex = stakeType.finesPeriodsCount - 1;
             for(uint i = stakeType.finesPeriodsCount; i > 0; i--) {
-                if(block.timestamp < startTimestamp.add(stakeType.fineDays[i - 1].mul(1 days))) {
+                if(block.timestamp < startTimestamp + stakeType.fineDays[i - 1]*(1 days)) {
                     stakePeriodIndex = i - 1;
                 }
             }
