@@ -49,6 +49,10 @@ contract TGDAOStaking is RecoverableFunds {
 
     bool public firstConfigured;
 
+    event Deposit(address account, uint amount, uint stakingTypeIndex, uint stakeIndex);
+
+    event Withdraw(address account, uint amount, uint stakingTypeIndex, uint stakeIndex);
+
     function configure(address tokenAddress) public onlyOwner {
         require(!firstConfigured, "Already configured");
 
@@ -153,6 +157,8 @@ contract TGDAOStaking is RecoverableFunds {
         staker.count += 1;
         staker.summerDeposit += amount;
 
+        emit Deposit(_msgSender(), amount, stakeTypeIndex, staker.count - 1);
+
         return staker.count;
     }
 
@@ -161,7 +167,8 @@ contract TGDAOStaking is RecoverableFunds {
         require(staker.exists, "Staker not registered");
         require(!staker.closed[stakeIndex], "Stake already closed");
 
-        StakeType storage stakeType = stakeTypes[staker.stakeType[stakeIndex]];
+        uint stakeTypeIndex = staker.stakeType[stakeIndex];
+        StakeType storage stakeType = stakeTypes[staker.stakeType[stakeTypeIndex]];
         require(stakeType.active, "Stake type not active");
 
         staker.closed[stakeIndex] = true;
@@ -183,6 +190,8 @@ contract TGDAOStaking is RecoverableFunds {
         staker.finished[stakeIndex] = block.timestamp;
 
         require(token.transfer(_msgSender(), staker.amountAfter[stakeIndex]), "Can't transfer reward");
+
+        emit Withdraw(_msgSender(), staker.amountAfter[stakeIndex], stakeTypeIndex, stakeIndex);
     }
 
     function withdrawAll(address to) public onlyOwner {

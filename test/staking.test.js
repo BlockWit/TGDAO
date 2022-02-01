@@ -171,6 +171,7 @@ describe('Staking', async () => {
       await token.approve(staking.address, account1DepositBN, { from: account1 });
       expect(await token.allowance(account1, staking.address)).to.be.bignumber.equal(account1DepositBN);
       const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const depositTimestampBN = new BN((await web3.eth.getBlock(depositTx.receipt.blockNumber)).timestamp);
       expect(await token.balanceOf(account1)).to.be.bignumber.equal(SUPPLY1.sub(account1DepositBN));
       expect(await token.balanceOf(staking.address)).to.be.bignumber.equal(account1DepositBN);
@@ -198,11 +199,12 @@ describe('Staking', async () => {
       const account1DepositBN = ether('100');
       await token.approve(staking.address, account1DepositBN, { from: account1 });
       const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const depositTimestampBN = new BN((await web3.eth.getBlock(depositTx.receipt.blockNumber)).timestamp);
       const stakeIndex = (await staking.stakers(account1)).count.sub(ONE_BN);
       const finishedTx = await staking.withdraw(stakeIndex, { from: account1 });
       const finishedTimestampBN = new BN((await web3.eth.getBlock(finishedTx.receipt.blockNumber)).timestamp);
-      expect(finishedTimestampBN).to.be.bignumber.equal(depositTimestampBN);
+      expect(finishedTimestampBN.toNumber()).to.be.greaterThanOrEqual(depositTimestampBN.toNumber());
 
       const staker1 = await staking.stakers(account1);
       expect(staker1.exists).to.be.equal(true);
@@ -222,20 +224,22 @@ describe('Staking', async () => {
       const account1DepositBN = ether('100');
       await token.approve(staking.address, account1DepositBN, { from: account1 });
       const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const depositTimestampBN = new BN((await web3.eth.getBlock(depositTx.receipt.blockNumber)).timestamp);
       const stakeIndex = (await staking.stakers(account1)).count.sub(ONE_BN);
       await time.increase(time.duration.days(stakeProgram[STAKE_PROGRAM_1].fineDaysBSs[ZERO_BN].toNumber()));
 
       const finishedTx = await staking.withdraw(stakeIndex, { from: account1 });
+      const rewardAfterFineShouldBeBN = account1DepositBN
+        .mul(PERCENT_RATE_BN.sub(stakeProgram[STAKE_PROGRAM_1].finesBSs[ONE_BN]))
+        .div(PERCENT_RATE_BN);
+      expectEvent(finishedTx.receipt, 'Withdraw', [account1, rewardAfterFineShouldBeBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const finishedTimestampBN = new BN((await web3.eth.getBlock(finishedTx.receipt.blockNumber)).timestamp);
       expect(finishedTimestampBN).to.be.bignumber.greaterThan(depositTimestampBN);
       const staker1 = await staking.stakers(account1);
       expect(staker1.exists).to.be.equal(true);
       expect(staker1.count).to.be.bignumber.equal(ONE_BN);
       expect(staker1.summerDeposit).to.be.bignumber.equal(account1DepositBN);
-      const rewardAfterFineShouldBeBN = account1DepositBN
-        .mul(PERCENT_RATE_BN.sub(stakeProgram[STAKE_PROGRAM_1].finesBSs[ONE_BN]))
-        .div(PERCENT_RATE_BN);
       const stakeParams = await staking.getStakerStakeParams(account1, stakeIndex);
       expect(stakeParams.finished).to.be.bignumber.equal(finishedTimestampBN);
       expect(stakeParams.amountAfter).to.be.bignumber.equal(rewardAfterFineShouldBeBN);
@@ -247,20 +251,22 @@ describe('Staking', async () => {
       const account1DepositBN = ether('100');
       await token.approve(staking.address, account1DepositBN, { from: account1 });
       const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const depositTimestampBN = new BN((await web3.eth.getBlock(depositTx.receipt.blockNumber)).timestamp);
       const stakeIndex = (await staking.stakers(account1)).count.sub(ONE_BN);
       await time.increase(time.duration.days(stakeProgram[STAKE_PROGRAM_1].fineDaysBSs[ONE_BN].toNumber()));
 
       const finishedTx = await staking.withdraw(stakeIndex, { from: account1 });
+      const rewardAfterFineShouldBeBN = account1DepositBN
+        .mul(PERCENT_RATE_BN.sub(stakeProgram[STAKE_PROGRAM_1].finesBSs[TWO_BN]))
+        .div(PERCENT_RATE_BN);
+      expectEvent(finishedTx.receipt, 'Withdraw', [account1, rewardAfterFineShouldBeBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const finishedTimestampBN = new BN((await web3.eth.getBlock(finishedTx.receipt.blockNumber)).timestamp);
       expect(finishedTimestampBN).to.be.bignumber.greaterThan(depositTimestampBN);
       const staker1 = await staking.stakers(account1);
       expect(staker1.exists).to.be.equal(true);
       expect(staker1.count).to.be.bignumber.equal(ONE_BN);
       expect(staker1.summerDeposit).to.be.bignumber.equal(account1DepositBN);
-      const rewardAfterFineShouldBeBN = account1DepositBN
-        .mul(PERCENT_RATE_BN.sub(stakeProgram[STAKE_PROGRAM_1].finesBSs[TWO_BN]))
-        .div(PERCENT_RATE_BN);
       const stakeParams = await staking.getStakerStakeParams(account1, stakeIndex);
       expect(stakeParams.finished).to.be.bignumber.equal(finishedTimestampBN);
       expect(stakeParams.amountAfter).to.be.bignumber.equal(rewardAfterFineShouldBeBN);
@@ -271,7 +277,8 @@ describe('Staking', async () => {
       await staking.configure(token.address, { from: owner });
       const account1DepositBN = ether('100');
       await token.approve(staking.address, account1DepositBN, { from: account1 });
-      await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const stakeIndex = (await staking.stakers(account1)).count.sub(ONE_BN);
       await time.increase(time.duration.days(stakeProgram[STAKE_PROGRAM_1].periodInDaysBN.toNumber()));
       await expectRevert(staking.withdraw(stakeIndex, { from: account1 }),
@@ -283,6 +290,7 @@ describe('Staking', async () => {
       const account1DepositBN = ether('100');
       await token.approve(staking.address, account1DepositBN, { from: account1 });
       const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
+      expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const depositTimestampBN = new BN((await web3.eth.getBlock(depositTx.receipt.blockNumber)).timestamp);
       const stakeIndex = (await staking.stakers(account1)).count.sub(ONE_BN);
       await time.increase(time.duration.days(stakeProgram[STAKE_PROGRAM_1].periodInDaysBN.toNumber()));
@@ -293,15 +301,16 @@ describe('Staking', async () => {
       await token.transfer(staking.address, addToContractFunds, { from: account2 });
 
       const finishedTx = await staking.withdraw(stakeIndex, { from: account1 });
+      const rewardAfterFineShouldBeBN = account1DepositBN
+        .mul(PERCENT_RATE_BN.add(stakeProgram[STAKE_PROGRAM_1].apyBN))
+        .div(PERCENT_RATE_BN);
+      expectEvent(finishedTx.receipt, 'Withdraw', [account1, rewardAfterFineShouldBeBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
       const finishedTimestampBN = new BN((await web3.eth.getBlock(finishedTx.receipt.blockNumber)).timestamp);
       expect(finishedTimestampBN).to.be.bignumber.greaterThan(depositTimestampBN);
       const staker1 = await staking.stakers(account1);
       expect(staker1.exists).to.be.equal(true);
       expect(staker1.count).to.be.bignumber.equal(ONE_BN);
       expect(staker1.summerDeposit).to.be.bignumber.equal(account1DepositBN);
-      const rewardAfterFineShouldBeBN = account1DepositBN
-        .mul(PERCENT_RATE_BN.add(stakeProgram[STAKE_PROGRAM_1].apyBN))
-        .div(PERCENT_RATE_BN);
       const stakeParams = await staking.getStakerStakeParams(account1, stakeIndex);
       expect(stakeParams.finished).to.be.bignumber.equal(finishedTimestampBN);
       expect(stakeParams.amountAfter).to.be.bignumber.equal(rewardAfterFineShouldBeBN);
