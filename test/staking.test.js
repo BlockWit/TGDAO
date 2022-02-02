@@ -37,6 +37,7 @@ const FINE_PERIOD_3_BN = new BN(2);
 const PERCENT_RATE_BN = new BN(100);
 
 const SECONDS_IN_DAY_BN = new BN(86400);
+const DAYS_IN_YEAR_BN = new BN(365);
 
 const STAKE_PROGRAM_1 = 0;
 const STAKE_PROGRAM_2 = 1;
@@ -90,7 +91,8 @@ const stakeAfterFine = (depositAmount, stakeProgramIndex, stakePeriodIndex) => {
 };
 
 const rewardPercent = (stakeProgramIndex) => {
-  return stakeProgram[stakeProgramIndex].apyBN;
+  const stakeProgramType = stakeProgram[stakeProgramIndex];
+  return stakeProgramType.apyBN.mul(stakeProgramType.periodInDaysBN).div(DAYS_IN_YEAR_BN);
 };
 
 async function increaseStakePeriod (stakeProgramIndex) {

@@ -181,7 +181,9 @@ contract TGDAOStaking is RecoverableFunds {
         staker.closed[stakeIndex] = true;
         uint startTimestamp =  staker.start[stakeIndex];
         if(block.timestamp >= startTimestamp + stakeType.periodInDays * (1 days)) {
-            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex].mul(PERCENT_DIVIDER + stakeType.apy).div(PERCENT_DIVIDER);
+            // Rewards calculation
+            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex]*(PERCENT_DIVIDER + stakeType.periodInDays * stakeType.apy / 365)/PERCENT_DIVIDER;
+            //staker.amount[stakeIndex].mul(PERCENT_DIVIDER + stakeType.apy).div(PERCENT_DIVIDER);
         } else {
             uint stakePeriodIndex = stakeType.finesPeriodsCount - 1;
             for(uint i = stakeType.finesPeriodsCount; i > 0; i--) {
@@ -189,6 +191,7 @@ contract TGDAOStaking is RecoverableFunds {
                     stakePeriodIndex = i - 1;
                 }
             }
+            // Fines calculation
             staker.amountAfter[stakeIndex] = staker.amount[stakeIndex].mul(PERCENT_DIVIDER - stakeType.fines[stakePeriodIndex]).div(PERCENT_DIVIDER);
         }
         require(token.balanceOf(address(this)) >= staker.amountAfter[stakeIndex], "Staking contract does not have enough funds! Owner should deposit funds...");
