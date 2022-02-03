@@ -44,7 +44,7 @@ const CanWithdraw = ({ item }) => {
   const onWithdraw = (e) => {
     e.preventDefault();
     console.log('Withdraw program clicked ', item.stakeIndex);
-    withdraw(web3Provider, item.stakeType).then(tx => {
+    withdraw(web3Provider, item.stakeIndex).then(tx => {
       setState({
         ...state,
         withdrawTried: true,
@@ -94,7 +94,8 @@ const CanWithdraw = ({ item }) => {
       }
     }
   } else {
-    return <Button variant="outlined" color="primary" onClick={onWithdraw}>{buttonLabel}</Button>;
+    const buttonId = "withdraw-" + item.stakeIndex;
+    return <Button id={buttonId} variant="outlined" color="primary" onClick={onWithdraw}>{buttonLabel}</Button>;
   }
 
 };

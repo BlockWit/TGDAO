@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { useWeb3 } from './walletUtils';
 import { parseEther } from 'ethers/lib/utils';
 
@@ -25,6 +25,7 @@ export async function withdraw (web3Provider, stakeIndex) {
   const stakingContract = stakeContractFromProvider(web3Provider);
   const signer = web3Provider.getSigner();
   const contractWithSigner = stakingContract.connect(signer);
+  console.log("WITHDRAW: ", stakeIndex);
   return await contractWithSigner.withdraw(stakeIndex);
 }
 
