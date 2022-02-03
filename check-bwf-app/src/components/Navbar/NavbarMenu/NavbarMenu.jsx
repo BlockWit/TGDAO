@@ -11,7 +11,7 @@ const NavbarMenu = () => {
             <Box display='flex' flexGrow={1}>
                 <NavbarMenuItem to={PATH_DEPOSIT} name='deposit' icon={<Apps/>} auth={true}/>
                 <NavbarMenuItem to={PATH_WITHDRAW} name='withdraw' icon={<Apps/>} auth={true}/>
-                <NavbarMenuItem to={PATH_LISTENER} name='listener' icon={<Apps/>} auth={true}/>
+                {/* <NavbarMenuItem to={PATH_LISTENER} name='listener' icon={<Apps/>} auth={true}/> */}
             </Box>
             <WalletNavbarMenuItem/>
         </>

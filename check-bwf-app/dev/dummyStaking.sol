@@ -410,8 +410,6 @@ contract RecoverableFunds is Ownable {
 
 }
 
-
-
 /**
  * @dev TGDAO Staking
  */
@@ -476,7 +474,7 @@ contract TGDAOStaking is RecoverableFunds {
         fines[1] = 25;
         fines[2] = 20;
 
-        addStakeTypeWithFines(3*30, 7, fines, fineDays);
+        addStakeTypeWithFines(3 * 30, 7, fines, fineDays);
 
         // 2nd
         fineDays[0] = 60;
@@ -487,7 +485,7 @@ contract TGDAOStaking is RecoverableFunds {
         fines[1] = 25;
         fines[2] = 20;
 
-        addStakeTypeWithFines(6*30, 14, fines, fineDays);
+        addStakeTypeWithFines(6 * 30, 14, fines, fineDays);
 
 
         // 3d
@@ -499,7 +497,7 @@ contract TGDAOStaking is RecoverableFunds {
         fines[1] = 25;
         fines[2] = 20;
 
-        addStakeTypeWithFines(12*30, 21, fines, fineDays);
+        addStakeTypeWithFines(12 * 30, 21, fines, fineDays);
         token = IERC20(tokenAddress);
 
         firstConfigured = true;
@@ -517,7 +515,7 @@ contract TGDAOStaking is RecoverableFunds {
         require(fines.length == fineDays.length, "Fines and fine days arrays must be equals");
         StakeType storage stakeType = stakeTypes[stakeTypeIndex];
         stakeType.finesPeriodsCount = fines.length;
-        for(uint i=0; i<fines.length; i++) {
+        for (uint i = 0; i < fines.length; i++) {
             require(fines[i] <= 1000, "Fines can't be more than 1000");
             stakeType.fines[i] = fines[i];
             require(fineDays[i] <= 100000, "Fine days can't be more than 10000");
@@ -535,26 +533,26 @@ contract TGDAOStaking is RecoverableFunds {
         stakeType.apy = apy;
     }
 
-    function addStakeType(uint periodInDays, uint apy) public onlyOwner returns(uint) {
+    function addStakeType(uint periodInDays, uint apy) public onlyOwner returns (uint) {
         stakeTypes.push();
         StakeType storage stakeType = stakeTypes[countOfStakeTypes++];
         stakeType.active = true;
         stakeType.periodInDays = periodInDays;
         stakeType.apy = apy;
-        return countOfStakeTypes-1;
+        return countOfStakeTypes - 1;
     }
 
     function setToken(address tokenAddress) public onlyOwner {
         token = IERC20(tokenAddress);
     }
 
-    function deposit(uint8 stakeTypeIndex, uint256 amount) public returns(uint) {
+    function deposit(uint8 stakeTypeIndex, uint256 amount) public returns (uint) {
         require(stakeTypeIndex < countOfStakeTypes, "Wrong stake type index");
         StakeType storage stakeType = stakeTypes[stakeTypeIndex];
         require(stakeType.active, "Stake type not active");
 
         Staker storage staker = stakers[_msgSender()];
-        if(!staker.exists) {
+        if (!staker.exists) {
             staker.exists = true;
             stakersAddresses.push(_msgSender());
             stakersAddressesCount++;
@@ -574,8 +572,8 @@ contract TGDAOStaking is RecoverableFunds {
         return staker.count;
     }
 
-    function withdraw(uint8 stakeIndex) public {
-        Staker storage staker = stakers[_msgSender()];
+    function calculateWithdrawValue(address stakerAddress, uint stakeIndex) public view returns (uint) {
+        Staker storage staker = stakers[stakerAddress];
         require(staker.exists, "Staker not registered");
         require(!staker.closed[stakeIndex], "Stake already closed");
 
@@ -583,28 +581,34 @@ contract TGDAOStaking is RecoverableFunds {
         StakeType storage stakeType = stakeTypes[staker.stakeType[stakeTypeIndex]];
         require(stakeType.active, "Stake type not active");
 
-        staker.closed[stakeIndex] = true;
-        uint startTimestamp =  staker.start[stakeIndex];
-        if(block.timestamp >= startTimestamp + stakeType.periodInDays * (1 days)) {
+        uint startTimestamp = staker.start[stakeIndex];
+        if (block.timestamp >= startTimestamp + stakeType.periodInDays * (1 days)) {
             // Rewards calculation
-            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex]*(PERCENT_DIVIDER + stakeType.periodInDays * stakeType.apy / 365)/PERCENT_DIVIDER;
-            //staker.amount[stakeIndex].mul(PERCENT_DIVIDER + stakeType.apy).div(PERCENT_DIVIDER);
+            return staker.amount[stakeIndex] * (PERCENT_DIVIDER + stakeType.periodInDays * stakeType.apy / 365) / PERCENT_DIVIDER;
         } else {
             uint stakePeriodIndex = stakeType.finesPeriodsCount - 1;
-            for(uint i = stakeType.finesPeriodsCount; i > 0; i--) {
-                if(block.timestamp < startTimestamp + stakeType.fineDays[i - 1]*(1 days)) {
+            for (uint i = stakeType.finesPeriodsCount; i > 0; i--) {
+                if (block.timestamp < startTimestamp + stakeType.fineDays[i - 1] * (1 days)) {
                     stakePeriodIndex = i - 1;
                 }
             }
             // Fines calculation
-            staker.amountAfter[stakeIndex] = staker.amount[stakeIndex].mul(PERCENT_DIVIDER - stakeType.fines[stakePeriodIndex]).div(PERCENT_DIVIDER);
+            return staker.amount[stakeIndex].mul(PERCENT_DIVIDER - stakeType.fines[stakePeriodIndex]).div(PERCENT_DIVIDER);
         }
+    }
+
+    function withdraw(uint8 stakeIndex) public {
+        Staker storage staker = stakers[_msgSender()];
+        staker.amountAfter[stakeIndex] = calculateWithdrawValue(_msgSender(), stakeIndex);
+
         require(token.balanceOf(address(this)) >= staker.amountAfter[stakeIndex], "Staking contract does not have enough funds! Owner should deposit funds...");
 
         staker.summerAfter = staker.summerAfter.add(staker.amountAfter[stakeIndex]);
         staker.finished[stakeIndex] = block.timestamp;
+        staker.closed[stakeIndex] = true;
 
         require(token.transfer(_msgSender(), staker.amountAfter[stakeIndex]), "Can't transfer reward");
+        uint stakeTypeIndex = staker.stakeType[stakeIndex];
 
         emit Withdraw(_msgSender(), staker.amountAfter[stakeIndex], stakeTypeIndex, stakeIndex);
     }
@@ -613,11 +617,11 @@ contract TGDAOStaking is RecoverableFunds {
         token.transfer(to, token.balanceOf(address(this)));
     }
 
-    function getStakeTypeFinePeriodAndFine(uint8 stakeTypeIndex, uint periodIndex) public view returns(uint, uint) {
+    function getStakeTypeFinePeriodAndFine(uint8 stakeTypeIndex, uint periodIndex) public view returns (uint, uint) {
         require(stakeTypeIndex < countOfStakeTypes, "Wrong stake type index");
         StakeType storage stakeType = stakeTypes[stakeTypeIndex];
         //require(stakeType.active, "Stake type not active");
-        require(periodIndex < stakeType.finesPeriodsCount , "Requetsed period idnex greater than max period index");
+        require(periodIndex < stakeType.finesPeriodsCount, "Requetsed period idnex greater than max period index");
         return (stakeType.fineDays[periodIndex], stakeType.fines[periodIndex]);
     }
 
@@ -629,7 +633,7 @@ contract TGDAOStaking is RecoverableFunds {
     }
 
     function getStakerStakeParams(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex)
-    returns(bool closed, uint amount, uint amountAfter, uint stakeType, uint start, uint finished) {
+    returns (bool closed, uint amount, uint amountAfter, uint stakeType, uint start, uint finished) {
         Staker storage staker = stakers[stakerAddress];
 
         uint[] memory uintValues = new uint[](5);
@@ -639,32 +643,8 @@ contract TGDAOStaking is RecoverableFunds {
         uintValues[3] = staker.start[stakeIndex];
         uintValues[4] = staker.finished[stakeIndex];
 
-        return (false, uintValues[0], uintValues[1], uintValues[2], uintValues[3], uintValues[4]);
+        return (staker.closed[stakeIndex], uintValues[0], uintValues[1], uintValues[2], uintValues[3], uintValues[4]);
     }
-
-    //    function isStakerStakeClosed(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex) returns(bool) {
-    //        return stakers[stakerAddress].closed[stakeIndex];
-    //    }
-    //
-    //    function getStakerStakeStart(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex) returns(uint) {
-    //        return stakers[stakerAddress].start[stakeIndex];
-    //    }
-    //
-    //    function getStakerStakeFinished(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex) returns(uint) {
-    //        return stakers[stakerAddress].finished[stakeIndex];
-    //    }
-    //
-    //    function getStakerStakeAmount(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex) returns(uint) {
-    //        return stakers[stakerAddress].amount[stakeIndex];
-    //    }
-    //
-    //    function getStakerStakeAmountAfter(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex) returns(uint) {
-    //        return stakers[stakerAddress].amount[amountAfter];
-    //    }
-    //
-    //    function getStakerStakeTypeIndex(address stakerAddress, uint stakeIndex) public view stakerStakeChecks(stakerAddress, stakeIndex) returns(uint) {
-    //        return stakers[stakerAddress].stakeType[amountAfter];
-    //    }
 
 }
 

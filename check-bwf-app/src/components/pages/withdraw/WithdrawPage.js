@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { makeStyles, Typography } from '@material-ui/core';
 import { useWallet } from 'use-wallet';
 import Loading from '../../common/Loading/Loading';
-import { allStakerInfo, calculateDepositWithFineOrReward, countOfStakeTypes } from '../../wallet/stakeContract';
+import { allStakerInfo, countOfStakeTypes } from '../../wallet/stakeContract';
 import { getWeb3FromWallet } from '../../wallet/walletUtils';
 import DataListView from '../../DataListView/DataListView';
 import CanWithdraw from './CanWithdraw/CanWithdraw';
+import { formatEther } from 'ethers/lib/utils';
+import { calculateDepositWithFineOrReward } from '../../wallet/stakeHelpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,26 +43,50 @@ const WithdrawPage = () => {
     if (state.loadedStakerInfo) {
       const options = {
         custom: {
+          stakeIndex: {
+            title: 'Id',
+            styles: {
+              width: '20px',
+              justifyContent: "flex-end"
+            },
+            customWrapper: (value) => {
+              if(value == '')
+                return 0;
+              return parseInt(value);
+            }
+          },
           closed: {
             styles: {
-              width: '40px',
-              justifyContent: 'flex-end'
+              width: '40px'
             }
           },
           amount: {
             title: 'Amount',
-            customWrapper: (value) => value.toString()
+            styles: {
+              width: '50px',
+              justifyContent: "flex-end"
+            },
+            customWrapper: (value) => formatEther(value)
           },
           amountAfter: {
             title: 'After withdraw',
+            styles: {
+              width: '120px',
+              justifyContent: "flex-end"
+            },
             customWrapper: (value, item) => {
-              if(item.closed)
-                return item.afterWithdraw.toString();
-              return calculateDepositWithFineOrReward(item.amount, item.stakeType, item.start).toString();
+              if (item.closed) {
+                return formatEther(value);
+              }
+              return formatEther(calculateDepositWithFineOrReward(item.amount, item.stakeType, item.start));
             }
           },
           stakeType: {
             title: 'Stake program',
+            styles: {
+              width: '120px',
+              justifyContent: "flex-end"
+            },
             customWrapper: (value) => {
               const nvalue = parseInt(value);
               let stakeTypeInfo = '3 month';
@@ -71,9 +97,10 @@ const WithdrawPage = () => {
           },
           start: {
             title: 'Deposited',
-            // styles: {
-            //   justifyContent: "flex-end"
-            // },
+            styles: {
+              width: '150px',
+              justifyContent: "flex-end"
+            },
             customWrapper: (value) => {
               const hrDate = new Date(value * 1000).toISOString().replace('T', ' ').substring(0, 19);
               return <>{hrDate}</>;
@@ -81,6 +108,10 @@ const WithdrawPage = () => {
           },
           finished: {
             title: 'Withdrawed',
+            styles: {
+              width: '150px',
+              justifyContent: "flex-end"
+            },
             customWrapper: (value) => {
               if (value == 0) {
                 return <></>;
@@ -90,7 +121,10 @@ const WithdrawPage = () => {
             }
           },
           action: {
-            title: '',
+            title: ' ',
+            styles: {
+              width: '210px'
+            },
             customWrapper: (value, item) => {
               if (!item.closed) {
                 return <CanWithdraw item={item}/>;
@@ -107,8 +141,10 @@ const WithdrawPage = () => {
     } else {
       allStakerInfo(web3Provider, account)
         .then(stakerInfo => {
+          let index = 0;
           return stakerInfo.map(stakeInfo => {
             return {
+              stakeIndex: index++,
               closed: stakeInfo.closed,
               amount: stakeInfo.amount,
               amountAfter: stakeInfo.amountAfter.toString(),
