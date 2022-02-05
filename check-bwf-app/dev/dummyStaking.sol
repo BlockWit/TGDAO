@@ -647,4 +647,3 @@ contract TGDAOStaking is RecoverableFunds {
     }
 
 }
-
