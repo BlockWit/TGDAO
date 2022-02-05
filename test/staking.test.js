@@ -11,6 +11,7 @@ const {
   time
 } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
+const { latestBlock } = require('@openzeppelin/test-helpers/src/time');
 
 const Token = contract.fromArtifact('TGDAOToken');
 const Staking = contract.fromArtifact('TGDAOStaking');
@@ -123,6 +124,81 @@ const reward = (depositAmount, stakeProgramIndex) => {
   return depositAmount.add(depositAmount.mul(rewardPercent(stakeProgramIndex)).div(PERCENT_RATE_BN));
 };
 
+const intgrData = {
+  accounts: [
+    {
+      account: account1,
+      balanceBefore: SUPPLY1,
+      stakes: [
+        {
+          amount: new BN(100),
+          period: new BN(1),
+          program: 0,
+          shouldWithdraw: new BN(70),
+          depositIndex: 0,
+          start: ZERO_BN,
+          finished: false
+        },
+        {
+          amount: new BN(100),
+          period: new BN(31),
+          program: 0,
+          shouldWithdraw: new BN(75),
+          depositIndex: 1,
+          start: ZERO_BN,
+          finished: false
+        },
+        {
+          amount: new BN(200),
+          period: new BN(91),
+          program: 0,
+          shouldWithdraw: reward(new BN(200), 0),
+          depositIndex: 2,
+          start: ZERO_BN,
+          finished: false
+        }
+      ],
+      summerDeposited: new BN(400),
+      summerAfter: SUPPLY1.sub(new BN(400)).add(new BN(145).add(reward(new BN(200), 0)))
+    },
+    {
+      account: account2,
+      balanceBefore: SUPPLY2,
+      stakes: [
+        {
+          amount: new BN(200),
+          period: new BN(1),
+          program: 1,
+          shouldWithdraw: new BN(140),
+          depositIndex: 0,
+          start: ZERO_BN,
+          finished: false
+        },
+        {
+          amount: new BN(400),
+          period: new BN(121),
+          program: 1,
+          shouldWithdraw: new BN(320),
+          depositIndex: 1,
+          start: ZERO_BN,
+          finished: false
+        },
+        {
+          amount: new BN(800),
+          period: new BN(180),
+          program: 1,
+          shouldWithdraw: reward(new BN(800), 1),
+          depositIndex: 2,
+          start: ZERO_BN,
+          finished: false
+        }
+      ],
+      summerDeposited: new BN(1400),
+      summerAfter: SUPPLY1.sub(new BN(1400)).add(new BN(460).add(reward(new BN(800), 1)))
+    }
+  ]
+};
+
 describe('Staking', async () => {
   let token;
   let staking;
@@ -141,6 +217,34 @@ describe('Staking', async () => {
     it('owner setToken works correctly', async function () {
       await staking.setToken(token.address, { from: owner });
       expect(await staking.token()).to.be.equal(token.address);
+    });
+  });
+
+  describe('Check only owner functions throws corresponding excepion', function () {
+    it('addStakeTypeWithFines', async function () {
+      await expectRevert(staking.addStakeTypeWithFines(1, 2, [3, 3], [1, 2], { from: account1 }),
+        'Ownable: caller is not the owner'
+      );
+    });
+    it('setStakeTypeFines', async function () {
+      await expectRevert(staking.setStakeTypeFines(1, [3, 3], [1, 2], { from: account1 }),
+        'Ownable: caller is not the owner'
+      );
+    });
+    it('changeStakeType', async function () {
+      await expectRevert(staking.changeStakeType(1, false, 12, 14, { from: account1 }),
+        'Ownable: caller is not the owner'
+      );
+    });
+    it('addStakeType', async function () {
+      await expectRevert(staking.addStakeType(1, 2, { from: account1 }),
+        'Ownable: caller is not the owner'
+      );
+    });
+    it('setToken', async function () {
+      await expectRevert(staking.setToken(token.address, { from: account1 }),
+        'Ownable: caller is not the owner'
+      );
     });
   });
 
@@ -426,6 +530,58 @@ describe('Staking', async () => {
       expect(staker1.summerAfter).to.be.bignumber.equal(rewardAfterFineShouldBe2BN.add(rewardAfterFineShouldBe1BN));
       const account1AfterAllRewards = SUPPLY1.sub(accountSummerDepositedBN).add(rewardAfterFineShouldBe1BN).add(rewardAfterFineShouldBe2BN);
       expect(await token.balanceOf(account1)).to.be.bignumber.equal(account1AfterAllRewards);
+    });
+  });
+  describe('integration tests', function () {
+    it('deposit and withdraw for two users for two different staking programs', async function () {
+      await staking.configure(token.address, { from: owner });
+      let deposited = ZERO_BN;
+      for (let i = 0; i < intgrData.accounts.length; i++) {
+        const accountData = intgrData.accounts[i];
+        let depositedByAccount = ZERO_BN;
+        for (let j = 0; j < accountData.stakes.length; j++) {
+          const deposit = accountData.stakes[j];
+          await token.approve(staking.address, deposit.amount, { from: accountData.account });
+          const depositTx = await staking.deposit(deposit.program, deposit.amount, { from: accountData.account });
+          const depositTxTimestamp = new BN((await web3.eth.getBlock(depositTx.receipt.blockNumber)).timestamp);
+          deposit.start = depositTxTimestamp;
+          expectEvent(depositTx.receipt, 'Deposit', [accountData.account, deposit.amount, new BN(deposit.program), new BN(deposit.depositIndex)]);
+          const stakeIndex = (await staking.stakers(accountData.account)).count.sub(ONE_BN);
+          depositedByAccount = depositedByAccount.add(deposit.amount);
+          deposited = deposited.add(deposit.amount);
+          expect(stakeIndex).to.be.bignumber.equal(new BN(deposit.depositIndex));
+          expect(await token.balanceOf(accountData.account)).to.be.bignumber.equal(accountData.balanceBefore.sub(depositedByAccount));
+          expect(await token.balanceOf(staking.address)).to.be.bignumber.equal(deposited);
+        }
+      }
+      const tickPeriodInDays = new BN(10);
+      const tickPeriods = 40;
+
+      const startBlockNumber = await latestBlock();
+      // const startTimestamp = new BN((await web3.eth.getBlock(startBlockNumber)).timestamp);
+
+      for (let t = 0; t < tickPeriods; t++) {
+        await time.increase(time.duration.days(tickPeriodInDays));
+        const currentBlockNumber = await latestBlock();
+        const currentTimestamp = new BN((await web3.eth.getBlock(currentBlockNumber)).timestamp);
+        for (let i = 0; i < intgrData.accounts.length; i++) {
+          const accountData = intgrData.accounts[i];
+          for (let j = 0; j < accountData.stakes.length; j++) {
+            const deposit = accountData.stakes[j];
+            if (!deposit.finished) {
+              const whenWithdrawDecision = deposit.start.add(deposit.period.mul(SECONDS_IN_DAY_BN));
+              if (currentTimestamp.gt(whenWithdrawDecision)) {
+                // console.log("Should pass: ", whenWithdrawDecision.sub(currentTimestamp).div(SECONDS_IN_DAY_BN).toString(), " days"); // 121 instead of 40
+                // console.log("From deposit start: ", currentTimestamp.sub(deposit.start).div(SECONDS_IN_DAY_BN).toString(), " days"); // + 90
+                // console.log("From start: ", currentTimestamp.sub(startTimestamp).div(SECONDS_IN_DAY_BN).toString(), " days");
+                const withdrawTx = await staking.withdraw(deposit.depositIndex, { from: accountData.account });
+                expectEvent(withdrawTx.receipt, 'Withdraw', [accountData.account, deposit.shouldWithdraw, new BN(deposit.program), new BN(deposit.depositIndex)]);
+                deposit.finished = true;
+              }
+            }
+          }
+        }
+      }
     });
   });
 });
