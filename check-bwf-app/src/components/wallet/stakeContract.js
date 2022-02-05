@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { useWeb3 } from './walletUtils';
 import { parseEther } from 'ethers/lib/utils';
 
@@ -11,7 +11,7 @@ const STAKING_ABI = [
   'function getStakerStakeParams(address stakerAddress, uint stakeIndex) public view returns(bool closed, uint amount, uint amountAfter, uint stakeType, uint start, uint finished)'
 ];
 
-export const STAKING_ADDRESS = '0xAED6d27c7208D6f3C685D918bfAc0AF9F1F2e627';
+export const STAKING_ADDRESS = '0xf71d743C6aA83164222b14FA831A4Cb346Ac0D4e';
 
 const stakeContractFromProvider = (web3provider) => {
   return new ethers.Contract(STAKING_ADDRESS, STAKING_ABI, web3provider);

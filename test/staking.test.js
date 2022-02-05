@@ -121,7 +121,8 @@ const fineDaysNumber = (stakeProgramIndex, stakePeriodIndex) => {
 };
 
 const reward = (depositAmount, stakeProgramIndex) => {
-  return depositAmount.add(depositAmount.mul(rewardPercent(stakeProgramIndex)).div(PERCENT_RATE_BN));
+  return depositAmount.add(stakeProgram[stakeProgramIndex].apyBN.mul(stakeProgram[stakeProgramIndex].periodInDaysBN).mul(depositAmount).div(new BN(36500)));
+  //return depositAmount.add(depositAmount.mul(rewardPercent(stakeProgramIndex)).div(PERCENT_RATE_BN));
 };
 
 const intgrData = {
@@ -131,70 +132,70 @@ const intgrData = {
       balanceBefore: SUPPLY1,
       stakes: [
         {
-          amount: new BN(100),
+          amount: ether('100'),
           period: new BN(1),
           program: 0,
-          shouldWithdraw: new BN(70),
+          shouldWithdraw: ether('70'),
           depositIndex: 0,
           start: ZERO_BN,
           finished: false
         },
         {
-          amount: new BN(100),
+          amount: ether('100'),
           period: new BN(31),
           program: 0,
-          shouldWithdraw: new BN(75),
+          shouldWithdraw: ether('75'),
           depositIndex: 1,
           start: ZERO_BN,
           finished: false
         },
         {
-          amount: new BN(200),
+          amount: ether('200'),
           period: new BN(91),
           program: 0,
-          shouldWithdraw: reward(new BN(200), 0),
+          shouldWithdraw: reward(ether('200'), 0),
           depositIndex: 2,
           start: ZERO_BN,
           finished: false
         }
       ],
-      summerDeposited: new BN(400),
-      summerAfter: SUPPLY1.sub(new BN(400)).add(new BN(145).add(reward(new BN(200), 0)))
+      summerDeposited: ether('400'),
+      summerAfter: SUPPLY1.sub(ether('400')).add(ether('145').add(reward(ether('200'), 0)))
     },
     {
       account: account2,
       balanceBefore: SUPPLY2,
       stakes: [
         {
-          amount: new BN(200),
+          amount: ether('200'),
           period: new BN(1),
           program: 1,
-          shouldWithdraw: new BN(140),
+          shouldWithdraw: ether('140'),
           depositIndex: 0,
           start: ZERO_BN,
           finished: false
         },
         {
-          amount: new BN(400),
+          amount: ether('400'),
           period: new BN(121),
           program: 1,
-          shouldWithdraw: new BN(320),
+          shouldWithdraw: ether('320'),
           depositIndex: 1,
           start: ZERO_BN,
           finished: false
         },
         {
-          amount: new BN(800),
+          amount: ether('800'),
           period: new BN(180),
           program: 1,
-          shouldWithdraw: reward(new BN(800), 1),
+          shouldWithdraw: reward(ether('800'), 1),
           depositIndex: 2,
           start: ZERO_BN,
           finished: false
         }
       ],
-      summerDeposited: new BN(1400),
-      summerAfter: SUPPLY2.sub(new BN(1400)).add(new BN(460).add(reward(new BN(800), 1)))
+      summerDeposited: ether('1400'),
+      summerAfter: SUPPLY2.sub(ether('1400')).add(ether('460').add(reward(ether('800'), 1)))
     }
   ]
 };
@@ -202,6 +203,10 @@ const intgrData = {
 describe('Staking', async () => {
   let token;
   let staking;
+
+  console.log('Награда программы 3 месяца для 100 токенов: ', reward(new BN('100000000000000000000'), 0).toString());
+  console.log('Награда программы 6 месяцeв для 100 токенов: ', reward(new BN('100000000000000000000'), 1).toString());
+  console.log('Награда программы 12 месяцeв для 100 токенов: ', reward(new BN('100000000000000000000'), 2).toString());
 
   beforeEach(async function () {
     token = await Token.new(initialAccounts, initialBalances, { from: owner });
@@ -354,7 +359,7 @@ describe('Staking', async () => {
   describe('deposit and withdraw', function () {
     it('deposit and withdraw before stake time limit immediately', async function () {
       await staking.configure(token.address, { from: owner });
-      const account1DepositBN = ether('100');
+      const account1DepositBN = new BN('100123456789000000000');
       await token.approve(staking.address, account1DepositBN, { from: account1 });
       const depositTx = await staking.deposit(STAKE_PROGRAM_1_BN, account1DepositBN, { from: account1 });
       expectEvent(depositTx.receipt, 'Deposit', [account1, account1DepositBN, STAKE_PROGRAM_1_BN, ZERO_BN]);
@@ -532,6 +537,7 @@ describe('Staking', async () => {
       expect(await token.balanceOf(account1)).to.be.bignumber.equal(account1AfterAllRewards);
     });
   });
+
   describe('integration tests', function () {
     it('deposit and withdraw for two users for two different staking programs', async function () {
       await staking.configure(token.address, { from: owner });

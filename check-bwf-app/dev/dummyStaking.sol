@@ -584,7 +584,7 @@ contract TGDAOStaking is RecoverableFunds {
         uint startTimestamp = staker.start[stakeIndex];
         if (block.timestamp >= startTimestamp + stakeType.periodInDays * (1 days)) {
             // Rewards calculation
-            return staker.amount[stakeIndex] * (PERCENT_DIVIDER + stakeType.periodInDays * stakeType.apy / 365) / PERCENT_DIVIDER;
+            return staker.amount[stakeIndex]  + staker.amount[stakeIndex]* stakeType.periodInDays * stakeType.apy / (365 * PERCENT_DIVIDER);
         } else {
             uint stakePeriodIndex = stakeType.finesPeriodsCount - 1;
             for (uint i = stakeType.finesPeriodsCount; i > 0; i--) {
