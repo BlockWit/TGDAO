@@ -194,7 +194,7 @@ const intgrData = {
         }
       ],
       summerDeposited: new BN(1400),
-      summerAfter: SUPPLY1.sub(new BN(1400)).add(new BN(460).add(reward(new BN(800), 1)))
+      summerAfter: SUPPLY2.sub(new BN(1400)).add(new BN(460).add(reward(new BN(800), 1)))
     }
   ]
 };
@@ -525,7 +525,7 @@ describe('Staking', async () => {
       expect(stakeParams2.finished).to.be.bignumber.equal(finishedTimestamp2BN);
       expect(stakeParams2.amountAfter).to.be.bignumber.equal(rewardAfterFineShouldBe2BN);
 
-      // update stker information
+      // update staker information
       staker1 = await staking.stakers(account1);
       expect(staker1.summerAfter).to.be.bignumber.equal(rewardAfterFineShouldBe2BN.add(rewardAfterFineShouldBe1BN));
       const account1AfterAllRewards = SUPPLY1.sub(accountSummerDepositedBN).add(rewardAfterFineShouldBe1BN).add(rewardAfterFineShouldBe2BN);
@@ -556,10 +556,6 @@ describe('Staking', async () => {
       }
       const tickPeriodInDays = new BN(10);
       const tickPeriods = 40;
-
-      const startBlockNumber = await latestBlock();
-      // const startTimestamp = new BN((await web3.eth.getBlock(startBlockNumber)).timestamp);
-
       for (let t = 0; t < tickPeriods; t++) {
         await time.increase(time.duration.days(tickPeriodInDays));
         const currentBlockNumber = await latestBlock();
@@ -571,16 +567,20 @@ describe('Staking', async () => {
             if (!deposit.finished) {
               const whenWithdrawDecision = deposit.start.add(deposit.period.mul(SECONDS_IN_DAY_BN));
               if (currentTimestamp.gt(whenWithdrawDecision)) {
-                // console.log("Should pass: ", whenWithdrawDecision.sub(currentTimestamp).div(SECONDS_IN_DAY_BN).toString(), " days"); // 121 instead of 40
-                // console.log("From deposit start: ", currentTimestamp.sub(deposit.start).div(SECONDS_IN_DAY_BN).toString(), " days"); // + 90
-                // console.log("From start: ", currentTimestamp.sub(startTimestamp).div(SECONDS_IN_DAY_BN).toString(), " days");
+                const accountBalanceBefore = await token.balanceOf(accountData.account);
                 const withdrawTx = await staking.withdraw(deposit.depositIndex, { from: accountData.account });
                 expectEvent(withdrawTx.receipt, 'Withdraw', [accountData.account, deposit.shouldWithdraw, new BN(deposit.program), new BN(deposit.depositIndex)]);
+                const accountBalanceAfter = await token.balanceOf(accountData.account);
+                expect(accountBalanceAfter).to.be.bignumber.equal(accountBalanceBefore.add(deposit.shouldWithdraw));
                 deposit.finished = true;
               }
             }
           }
         }
+      }
+      for (let i = 0; i < intgrData.accounts.length; i++) {
+        const accountData = intgrData.accounts[i];
+        expect(await token.balanceOf(accountData.account)).to.be.bignumber.equal(accountData.summerAfter);
       }
     });
   });
