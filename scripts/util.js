@@ -49,7 +49,22 @@ async function timeout (ms) {
 
 function fromCSV (filename) {
   const file = fs.readFileSync(filename, 'utf-8');
-  const lines = file.split(/\r\n|\n/);
+  const lines = file.split(/\r\n|\n/).filter(s => s);
+  const entries = lines.map(line => line.split(','));
+  const result = {
+    addresses: [],
+    balances: []
+  };
+  entries.forEach(([address, balance]) => {
+    result.addresses.push(address.trim());
+    result.balances.push(balance.trim());
+  });
+  return result;
+}
+
+function fromCSVToRows (filename) {
+  const file = fs.readFileSync(filename, 'utf-8');
+  const lines = file.split(/\r\n|\n/).filter(s => s);
   const entries = lines.map(line => line.split(','));
   const result = {
     addresses: [],
@@ -60,6 +75,12 @@ function fromCSV (filename) {
     result.balances.push(balance);
   });
   return result;
+}
+
+function splitCSV (filename, name) {
+  const file = fs.readFileSync(filename, 'utf-8');
+  const lines = file.split(/\r\n|\n/).filter(s => s);
+  lines.forEach((line, idx) => fs.appendFileSync(`${name}_${idx}.csv`, line));
 }
 
 module.exports = { fromCSV, logger, timeout };
