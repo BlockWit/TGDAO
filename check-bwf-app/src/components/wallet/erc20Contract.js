@@ -27,7 +27,7 @@ export async function approve(web3Provider, to, amount) {
   return await contractWithSigner.approve(to, parseEther(amount));
 }
 
-export async function countOfStakeTypes (web3Provider, account) {
+export async function balanceOf (web3Provider, account) {
   const erc20Contract = erc20ContractFromProvider(web3Provider);
   return await erc20Contract.balanceOf(account);
 }
