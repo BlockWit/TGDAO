@@ -19,6 +19,7 @@ TGDAO smart-contract
 2. _CrowdSale_ - Sale contract
 3. _VestingWallet_ - Wallet contract
 4. _TokenDepositor_ - Token distributor
+5. _TGDAOStaking_ - Staking contract
 
 ### How to work with this project
 #### To start working with the contracts, please, follow theese steps for each contract:
@@ -60,6 +61,7 @@ EXODUS does not support BEP20, but provides the ability to export the private ke
 * [CrowdSale](https://bscscan.com/address/0xD076366c8DbCfaba1E8F672D66234CD060A5fC71#code)
 * [VestingWallet](https://bscscan.com/address/0x4D1CeBBDb249576988f915D4a528630240ac6906#code)
 * [TokenDepositor](https://bscscan.com/address/0x148f5f267241d32c14082fadaf3bb5d8f29a505f#code)
+* [TGDAOStaking](https://bscscan.com/address/0x4142DA886A8ba344A290d276CD9a381A2fD9cbA5#code)
 
 ## Test network configuration (BSC Testnet)
 You can find test log [here](docs/bsctestnet.log.md)
