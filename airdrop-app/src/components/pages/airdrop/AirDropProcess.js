@@ -3,7 +3,9 @@ import { Container, Grid, makeStyles, Typography } from '@material-ui/core';
 import DataListView from '../../DataListView/DataListView';
 import ShrinkAddress from '../../common/ShrinkAddress/ShrinkAddress';
 import ShrinkAddressTx from '../../common/ShrinkAddress/ShrinkAddressTx';
-import { Check } from '@material-ui/icons';
+import Loading from '../../common/Loading/Loading';
+import { Check, Error } from '@material-ui/icons';
+import { airdropMultipleWithPredefinedToken } from '../../wallet/airDropContract';
 
 function useInterval (callback, delay) {
   const savedCallback = useRef();
@@ -46,33 +48,103 @@ const AirDropProcess = ({
 }) => {
   const classes = useStyles();
 
-  const airDropsTxs = airDrops.map(airDropAcc => {
-    return {
-      account: airDropAcc.address,
-      balance: airDropAcc.balance,
-      withdrawed: false,
-      tx: null
-    };
-  });
-
+  // const airDropsTxs = airDrops.map(airDropAcc => {
+  //   return {
+  //     account: airDropAcc.address,
+  //     balance: airDropAcc.balance,
+  //     withdrawed: false,
+  //     tx: null
+  //   };
+  // });
+  //
   const [state, setState] = useState({
-    txs: [],
+    txs: []  // tx: accounts: [], tx
   });
-
-  const divider = 100;
 
   useInterval(() => {
 
-    const iterations = [];
-    for (let i = 0; i < airDrops.length; i++) {
-      if(airDrops[i].tx === null) {
-
+    let processingTx = null;
+    for (let i = 0; i < state.txs.length; i++) {
+      if (state.txs[i].txState === 'processing') {
+        processingTx = i;
       }
     }
 
-    // Your custom logic here
-    console.log('Interval call');
-  }, 1000);
+    if (processingTx === null) {
+
+      const bucket = [];
+      for (let i = 0; i < airDrops.length; i++) {
+        let foundAccount = false;
+        for (let j = 0; j < state.txs.length; j++) {
+          for (let k = 0; k < state.txs[j].accounts.length; k++) {
+            const curAccount = state.txs[j].accounts[k];
+            if (curAccount === airDrops[i].address) {
+              foundAccount = true;
+              break;
+            }
+          }
+        }
+        if (!foundAccount) {
+          bucket.push(airDrops[i]);
+        }
+        if (bucket.length >= 100) {
+          break;
+        }
+      }
+
+//      console.log('Bucket ', bucket);
+
+      if (bucket.length > 0) {
+        // console.log('Bucket map ', bucket.map(t => t.address));
+        // setState({
+        //   ...state,
+        //   txs: [...state.txs, {
+        //     tx: Math.random(),
+        //     txState: 'processing',
+        //     accounts: bucket.map(t => t.address)
+        //   }]
+        // });
+
+        airdropMultipleWithPredefinedToken(web3Provider, bucket.map(t => t.address), bucket.map(t => t.balance)).then((tx) => {
+          setState({
+            ...state,
+            txs: [...state.txs, {
+              tx: tx,
+              txState: 'processing',
+              accounts: bucket.map(t => t.address)
+            }]
+          });
+        });
+      }
+    } else {
+      web3Provider.getTransactionReceipt(state.txs[processingTx].tx.hash).then(txReceipt => {
+        if (txReceipt != null) {
+          console.log('tx receipt ', txReceipt);
+          if (txReceipt.status === 1) {
+            const newTxs = [...state.txs];
+            newTxs[processingTx] = {
+              ...newTxs[processingTx],
+              txState: 'finished'
+            };
+            setState({
+              ...state,
+              txs: newTxs
+            });
+          } else {
+            const newTxs = [...state.txs];
+            newTxs[processingTx] = {
+              ...newTxs[processingTx],
+              txState: 'failed'
+            };
+            setState({
+              ...state,
+              txs: newTxs
+            });
+          }
+        }
+      });
+    }
+  }, 10000);
 
   const options = {
     custom: {
@@ -96,15 +168,21 @@ const AirDropProcess = ({
           return item.balance.toString();
         }
       },
-      withdrawed: {
-        title: 'Sent',
+      txStatus: {
+        title: 'Status',
         styles: {
           width: '20px',
           justifyContent: 'flex-end'
         },
         customWrapper: (value, item) => {
-          if (item.withdrawed) {
+          if (item.txStatus === 'unknown') {
+            return <></>;
+          } else if (item.txStatus === 'processing') {
+            return <Loading/>;
+          } else if (item.txStatus === 'finished') {
             return <Check/>;
+          } else if (item.txStatus === 'failed') {
+            return <Error/>;
           }
           return <></>;
         }
@@ -119,12 +197,43 @@ const AirDropProcess = ({
           if (item.tx === null) {
             return <></>;
           }
-          return <ShrinkAddressTx tx={item.tx}/>;
+          console.log(item.tx);
+          return <ShrinkAddressTx tx={item.tx.hash}/>;
         }
       }
     }
   };
 
+  const airDropsTxs = [];
+  for (let i = 0; i < airDrops.length; i++) {
+    let foundAccount = false;
+    let tx = null;
+    for (let j = 0; j < state.txs.length; j++) {
+      for (let k = 0; k < state.txs[j].accounts.length; k++) {
+        const curAccount = state.txs[j].accounts[k];
+        if (curAccount === airDrops[i].address) {
+          tx = state.txs[j];
+          foundAccount = true;
+          break;
+        }
+      }
+    }
+    if (foundAccount) {
+      airDropsTxs.push({
+        account: airDrops[i].address,
+        balance: airDrops[i].balance,
+        txStatus: tx.txState,
+        tx: tx.tx
+      });
+    } else {
+      airDropsTxs.push({
+        account: airDrops[i].address,
+        balance: airDrops[i].balance,
+        txStatus: 'unknown',
+        tx: null
+      });
+    }
+  }
   return (
     <Container className={classes.container} maxWidth={'lg'}>
       <Typography variant={'h4'}>AirDrop process</Typography>

@@ -5,7 +5,7 @@ import styles from './Loading.module.css';
 const Loading = () => {
 	return (
 		<div className={styles.loading}>
-			<CircularProgress/>
+			<CircularProgress size='1.1rem'/>
 		</div>
 	)
 }

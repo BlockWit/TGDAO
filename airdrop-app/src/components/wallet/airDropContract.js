@@ -27,6 +27,7 @@ export async function owner (web3Provider) {
 }
 
 export async function airdropMultipleWithPredefinedToken (web3Provider, addresses, values) {
+  console.log("CHECK:", addresses, values);
   const airDropContract = airDropContractFromProvider(web3Provider);
   const signer = web3Provider.getSigner();
   const contractWithSigner = airDropContract.connect(signer);

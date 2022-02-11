@@ -8,6 +8,7 @@ import { getWeb3FromWallet, REGEXP_ADDRESS, REGEXP_UINT } from '../../wallet/wal
 import { balanceOf } from '../../wallet/erc20Contract';
 import { BigNumber } from 'ethers';
 import AirDropProcess from './AirDropProcess';
+import { getAddress } from 'ethers/lib/utils';
 
 export const calculateAirDropBalance = (values) => {
   let sum = BigNumber.from(0);
@@ -131,7 +132,7 @@ const AirDropPage = () => {
           }
 
           airDrops.push({
-            address: address,
+            address: getAddress(address),
             balance: BigNumber.from(balance)
           });
         }
