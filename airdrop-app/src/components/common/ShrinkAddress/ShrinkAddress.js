@@ -9,13 +9,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ShrinkAddress = ({ address }) => {
+const ShrinkAddress = ({ address, shrinkLength = 10, shrink = true}) => {
   const classes = useStyles();
 
   let visibleAddress = address;
-  if (address.length >= 20) {
-    const shrinkLength = 10;
-    visibleAddress = address.substring(0, shrinkLength) + '...' + address.substring(address.length - shrinkLength);
+
+  if(shrink) {
+    if (address.length >= 20) {
+      visibleAddress = address.substring(0, shrinkLength) + '...' + address.substring(address.length - shrinkLength);
+    }
   }
 
   return (

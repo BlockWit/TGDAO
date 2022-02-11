@@ -5,6 +5,17 @@ import { AIRDROP_ADDRESS, owner } from '../../wallet/airDropContract';
 import ShrinkAddress from '../../common/ShrinkAddress/ShrinkAddress';
 import Loading from '../../common/Loading/Loading';
 import { getWeb3FromWallet, REGEXP_ADDRESS, REGEXP_UINT } from '../../wallet/walletUtils';
+import { balanceOf } from '../../wallet/erc20Contract';
+import { BigNumber } from 'ethers';
+import AirDropProcess from './AirDropProcess';
+
+export const calculateAirDropBalance = (values) => {
+  let sum = BigNumber.from(0);
+  for (let i = 0; i < values.length; i++) {
+    sum = sum.add(values[i].balance);
+  }
+  return sum;
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,14 +37,13 @@ const AirDropPage = () => {
 
   const [state, setState] = useState({
     values: '',
+    checkingMoney: false,
+    moneyChecked: false,
+    airdropBalance: null,
     airdropOwner: null,
     errorValue: true,
     errorValueMsg: 'Fill addresses before start AirDrop process',
-    isAirdropPreparing: false,
-    isAirdropProcessing: false,
-    isAirdropFinished: false,
-    airDrops: [],
-    iterations: []
+    airDrops: []
   });
 
   if (state.airdropOwner === null) {
@@ -52,7 +62,6 @@ const AirDropPage = () => {
   }
 
   if (account !== state.airdropOwner) {
-    console.log('NEQ: ', account, state.airdropOwner);
     return (
       <Container className={classes.container} maxWidth="xs">
         Connected address <ShrinkAddress address={account}/> is not AirDrop contract owner.
@@ -123,7 +132,7 @@ const AirDropPage = () => {
 
           airDrops.push({
             address: address,
-            balance: balance
+            balance: BigNumber.from(balance)
           });
         }
 
@@ -140,27 +149,61 @@ const AirDropPage = () => {
     }
   };
 
-  const onAirDropStart = () => {
+  const checkAirDropBalances = (e) => {
+    e.preventDefault();
     setState({
       ...state,
-      isAirdropPreparing: true
+      checkingMoney: true
+    });
+    balanceOf(web3Provider, AIRDROP_ADDRESS).then(balance => {
+      setState({
+        ...state,
+        airdropBalance: balance,
+        checkingMoney: false,
+        moneyChecked: true,
+      });
     });
   };
-
-  if (state.isAirdropPreparing) {
+  if (state.checkingMoney) {
     return (
-      <>Preparing</>
+      <>
+        <Typography variant={'h4'}>Reading balance of AirDrop contract</Typography>
+        <Loading/>
+      </>
     );
-  }
-  if (state.isAirdropProcessing || state.isAirdropFinished) {
-    return (
-      <>Processing</>
-    );
+  } else if (!state.checkingMoney && state.moneyChecked) {
+    const airDropBalance = calculateAirDropBalance(state.airDrops);
+    if (state.airdropBalance.gte(airDropBalance)) {
+      return <AirDropProcess wallet={wallet}
+                             account={account}
+                             web3Provider={web3Provider}
+                             airDrops={state.airDrops}
+      />;
+    } else {
+      return (
+        <Container className={classes.container} maxWidth={'md'}>
+          <Grid container spacing={3}>
+            <Grid item md={12}>
+              <Typography variant="h6" align="center">
+                AirDrop contract balance {state.airdropBalance.toString()} less than
+                required {airDropBalance.toString()}
+              </Typography>
+            </Grid>
+            <Grid item md={12}>
+              <Button
+                color="primary"
+                fullWidth
+                variant="contained"
+                onClick={checkAirDropBalances}
+              >
+                Check again
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
+      );
+    }
   } else {
-
-    // const values = state.airDrops.map(airDropAccParam => {
-    //   return airDropAccParam.address + ',' + airDropAccParam.balance;
-    // }).join('\n');
 
     return (
       <Container className={classes.container} maxWidth={'md'}>
@@ -169,7 +212,7 @@ const AirDropPage = () => {
             <Typography variant="h6" align="center">AirDrop process</Typography>
           </Grid>
         </Grid>
-        <form noValidate autoComplete="off" onSubmit={onAirDropStart}>
+        <form noValidate autoComplete="off" onSubmit={checkAirDropBalances}>
           <Grid container spacing={3}>
             <Grid item md={12}>
               <TextField
