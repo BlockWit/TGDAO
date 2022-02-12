@@ -137,6 +137,8 @@ const AirDropPage = () => {
           });
         }
 
+        // TODO: Check unique
+
         if (!errors) {
           setState({
             ...state,

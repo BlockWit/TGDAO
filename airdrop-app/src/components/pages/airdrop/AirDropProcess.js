@@ -148,6 +148,13 @@ const AirDropProcess = ({
 
   const options = {
     custom: {
+      id: {
+        title: 'Id',
+        styles: {
+          width: '20px',
+          justifyContent: 'flex-end'
+        }
+      },
       account: {
         title: 'Account',
         styles: {
@@ -220,6 +227,7 @@ const AirDropProcess = ({
     }
     if (foundAccount) {
       airDropsTxs.push({
+        id: i + 1,
         account: airDrops[i].address,
         balance: airDrops[i].balance,
         txStatus: tx.txState,
@@ -227,6 +235,7 @@ const AirDropProcess = ({
       });
     } else {
       airDropsTxs.push({
+        id: i + 1,
         account: airDrops[i].address,
         balance: airDrops[i].balance,
         txStatus: 'unknown',
