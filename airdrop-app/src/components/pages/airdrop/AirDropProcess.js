@@ -55,45 +55,71 @@ const AirDropProcess = ({
   });
 
   useInterval(() => {
-    if (state.bucketsSent === true) {
+    if (state.bucketsSent == true) {
       let processingTx = null;
       for (let i = 0; i < state.txs.length; i++) {
         if (state.txs[i].txState === 'processing') {
           processingTx = i;
+          break;
         }
       }
 
-      web3Provider.getTransactionReceipt(state.txs[processingTx].tx.hash).then(txReceipt => {
-        if (txReceipt != null) {
-          console.log('tx receipt ', txReceipt);
-          if (txReceipt.status === 1) {
-            const newTxs = [...state.txs];
-            newTxs[processingTx] = {
-              ...newTxs[processingTx],
-              txState: 'finished'
-            };
-            setState({
-              ...state,
-              txs: newTxs
-            });
-          } else {
-            const newTxs = [...state.txs];
-            newTxs[processingTx] = {
-              ...newTxs[processingTx],
-              txState: 'failed'
-            };
-            setState({
-              ...state,
-              txs: newTxs
-            });
+      if (processingTx != null) {
+        web3Provider.getTransactionReceipt(state.txs[processingTx].tx.hash).then(txReceipt => {
+          if (txReceipt != null) {
+            console.log('tx receipt ', txReceipt);
+            if (txReceipt.status === 1) {
+              const newTxs = [...state.txs];
+              newTxs[processingTx] = {
+                ...newTxs[processingTx],
+                txState: 'finished'
+              };
+              setState({
+                ...state,
+                txs: newTxs
+              });
+            } else {
+              const newTxs = [...state.txs];
+              newTxs[processingTx] = {
+                ...newTxs[processingTx],
+                txState: 'failed'
+              };
+              setState({
+                ...state,
+                txs: newTxs
+              });
+            }
           }
-        }
-      });
+        });
+      }
     }
   }, 10000);
 
+  useEffect(() => {
+    if (state.bucketsSent === false) {
+      if (state.buckets != null) {
+        Promise.all(state.buckets.map((bucket) => {
+          console.log('bucket : item');
+          return airdropMultipleWithPredefinedToken(web3Provider, bucket.map(t => t.address), bucket.map(t => t.balance)).then(tx => {
+            return {
+              tx: tx,
+              txState: 'processing',
+              accounts: bucket.map(t => t.address)
+            };
+          });
+        })).then(txs => {
+          console.log('Set state ', true);
+          setState({
+            ...state,
+            txs: txs,
+            bucketsSent: true
+          });
+        });
+      }
+    }
+  }, [state.bucketsSent, state.buckets]);
 
-  console.log("BS ", state.bucketsSent);
+  console.log('BS ', state.bucketsSent);
   if (state.bucketsSent === false) {
     if (state.buckets == null) {
       const buckets = [];
@@ -116,31 +142,12 @@ const AirDropProcess = ({
         });
       }
     } else {
-      console.log('HERES!');
-      if(!lock) {
-        lock = true;
-        Promise.all(state.buckets.map((bucket) => {
-          console.log('bucket : item');
-          return airdropMultipleWithPredefinedToken(web3Provider, bucket.map(t => t.address), bucket.map(t => t.balance)).then(tx => {
-            return {
-              tx: tx,
-              txState: 'processing',
-              accounts: bucket.map(t => t.address)
-            };
-          });
-        })).then(txs => {
-          setState({
-            ...state,
-            txs: txs,
-            bucketsSent: true
-          });
-        });
-      }
-      return (
-        <Container className={classes.container} maxWidth={'lg'}>
-          <Typography variant={'h4'}>Approving</Typography>
-        </Container>
-      );
+      // console.log('HERES!');
+      // return (
+      //   <Container className={classes.container} maxWidth={'lg'}>
+      //     <Typography variant={'h4'}>Approving</Typography>
+      //   </Container>
+      // );
     }
   }
 

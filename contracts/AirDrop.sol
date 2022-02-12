@@ -25,6 +25,7 @@ contract AirDrop is RecoverableFunds {
         }
     }
 
+
     function fill(uint size) {
         uint i = counter;
         uint max = counter + size;

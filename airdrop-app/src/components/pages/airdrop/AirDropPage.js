@@ -144,7 +144,8 @@ const AirDropPage = () => {
 
           airDrops.push({
             address: getAddress(address),
-            balance: BigNumber.from(balance)
+            //balance: BigNumber.from(balance)
+            balance: BigNumber.from(parseInt(balance.toString().substring(0, balance.length - 0)))
           });
         }
 
