@@ -30,6 +30,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const checkUnique = (airDrops) => {
+  for (let i = 0; i < airDrops.length; i++) {
+    for (let j = 0; j < airDrops.length; j++) {
+      if (i !== j && airDrops[i].address === airDrops[j].address) {
+        return 'Address ' + (i + 1) + ' not unique, because equals to ' + (j + 1);
+      }
+    }
+  }
+  return null;
+};
+
 const AirDropPage = () => {
   const classes = useStyles();
   const wallet = useWallet();
@@ -137,16 +148,24 @@ const AirDropPage = () => {
           });
         }
 
-        // TODO: Check unique
-
         if (!errors) {
-          setState({
-            ...state,
-            values: value,
-            errorValue: false,
-            errorValueMsg: null,
-            airDrops: airDrops
-          });
+          const errorUnique = checkUnique(airDrops);
+          if (errorUnique == null) {
+            setState({
+              ...state,
+              values: value,
+              errorValue: false,
+              errorValueMsg: null,
+              airDrops: airDrops
+            });
+          } else {
+            setState({
+              ...state,
+              values: value,
+              errorValue: true,
+              errorValueMsg: errorUnique
+            });
+          }
         }
       }
     }
@@ -167,6 +186,7 @@ const AirDropPage = () => {
       });
     });
   };
+
   if (state.checkingMoney) {
     return (
       <>

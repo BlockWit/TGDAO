@@ -7,6 +7,8 @@ import Loading from '../../common/Loading/Loading';
 import { Check, Error } from '@material-ui/icons';
 import { airdropMultipleWithPredefinedToken } from '../../wallet/airDropContract';
 
+let lock = false;
+
 function useInterval (callback, delay) {
   const savedCallback = useRef();
 
@@ -41,82 +43,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const AirDropProcess = ({
-  wallet,
   web3Provider,
-  account,
   airDrops
 }) => {
   const classes = useStyles();
 
-  // const airDropsTxs = airDrops.map(airDropAcc => {
-  //   return {
-  //     account: airDropAcc.address,
-  //     balance: airDropAcc.balance,
-  //     withdrawed: false,
-  //     tx: null
-  //   };
-  // });
-  //
   const [state, setState] = useState({
-    txs: []  // tx: accounts: [], tx
+    txs: [],
+    bucketsSent: false,
+    buckets: null
   });
 
   useInterval(() => {
-
-    let processingTx = null;
-    for (let i = 0; i < state.txs.length; i++) {
-      if (state.txs[i].txState === 'processing') {
-        processingTx = i;
-      }
-    }
-
-    if (processingTx === null) {
-
-      const bucket = [];
-      for (let i = 0; i < airDrops.length; i++) {
-        let foundAccount = false;
-        for (let j = 0; j < state.txs.length; j++) {
-          for (let k = 0; k < state.txs[j].accounts.length; k++) {
-            const curAccount = state.txs[j].accounts[k];
-            if (curAccount === airDrops[i].address) {
-              foundAccount = true;
-              break;
-            }
-          }
-        }
-        if (!foundAccount) {
-          bucket.push(airDrops[i]);
-        }
-        if (bucket.length >= 100) {
-          break;
+    if (state.bucketsSent === true) {
+      let processingTx = null;
+      for (let i = 0; i < state.txs.length; i++) {
+        if (state.txs[i].txState === 'processing') {
+          processingTx = i;
         }
       }
 
-//      console.log('Bucket ', bucket);
-
-      if (bucket.length > 0) {
-        // console.log('Bucket map ', bucket.map(t => t.address));
-        // setState({
-        //   ...state,
-        //   txs: [...state.txs, {
-        //     tx: Math.random(),
-        //     txState: 'processing',
-        //     accounts: bucket.map(t => t.address)
-        //   }]
-        // });
-
-        airdropMultipleWithPredefinedToken(web3Provider, bucket.map(t => t.address), bucket.map(t => t.balance)).then((tx) => {
-          setState({
-            ...state,
-            txs: [...state.txs, {
-              tx: tx,
-              txState: 'processing',
-              accounts: bucket.map(t => t.address)
-            }]
-          });
-        });
-      }
-    } else {
       web3Provider.getTransactionReceipt(state.txs[processingTx].tx.hash).then(txReceipt => {
         if (txReceipt != null) {
           console.log('tx receipt ', txReceipt);
@@ -145,6 +91,58 @@ const AirDropProcess = ({
       });
     }
   }, 10000);
+
+
+  console.log("BS ", state.bucketsSent);
+  if (state.bucketsSent === false) {
+    if (state.buckets == null) {
+      const buckets = [];
+      let bucket = [];
+      for (let i = 0; i < airDrops.length; i++) {
+        bucket.push(airDrops[i]);
+        if (bucket.length >= 200) {
+          buckets.push(bucket);
+          bucket = [];
+        }
+      }
+      if (bucket.length > 0) {
+        buckets.push(bucket);
+      }
+
+      if (buckets.length > 0) {
+        setState({
+          ...state,
+          buckets: buckets
+        });
+      }
+    } else {
+      console.log('HERES!');
+      if(!lock) {
+        lock = true;
+        Promise.all(state.buckets.map((bucket) => {
+          console.log('bucket : item');
+          return airdropMultipleWithPredefinedToken(web3Provider, bucket.map(t => t.address), bucket.map(t => t.balance)).then(tx => {
+            return {
+              tx: tx,
+              txState: 'processing',
+              accounts: bucket.map(t => t.address)
+            };
+          });
+        })).then(txs => {
+          setState({
+            ...state,
+            txs: txs,
+            bucketsSent: true
+          });
+        });
+      }
+      return (
+        <Container className={classes.container} maxWidth={'lg'}>
+          <Typography variant={'h4'}>Approving</Typography>
+        </Container>
+      );
+    }
+  }
 
   const options = {
     custom: {
@@ -204,7 +202,6 @@ const AirDropProcess = ({
           if (item.tx === null) {
             return <></>;
           }
-          console.log(item.tx);
           return <ShrinkAddressTx tx={item.tx.hash}/>;
         }
       }
