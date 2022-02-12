@@ -11,7 +11,7 @@ const STAKING_ABI = [
   'function airdropMultipleWithEqualsPredefinedToken(uint value, address[] memory addresses) public'
 ];
 
-export const AIRDROP_ADDRESS = '0x767b61B5dcfB2F5044b40703681567bf2b565049';
+export const AIRDROP_ADDRESS = '0x4DEbDF80D5aC6Cab5845B797CEBeE63167435Fba';
 
 const airDropContractFromProvider = (web3provider) => {
   return new ethers.Contract(AIRDROP_ADDRESS, STAKING_ABI, web3provider);

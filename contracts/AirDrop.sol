@@ -17,16 +17,14 @@ contract AirDrop is RecoverableFunds {
 
     uint public counter;
 
-    uint public value;
-
     function addAddresses(address[] memory inAccounts) public onlyOwner() {
-        for (int i = 0; i < inAccounts.length; i++) {
+        for (uint i = 0; i < inAccounts.length; i++) {
             accounts.push(inAccounts[i]);
         }
     }
 
 
-    function fill(uint size) {
+    function fill(uint size, uint value) public onlyOwner() {
         uint i = counter;
         uint max = counter + size;
         counter = max;
@@ -35,16 +33,12 @@ contract AirDrop is RecoverableFunds {
             max = accounts.length;
         }
         for (; i < max; i++) {
-            localToken.transfer(accounts[i], value);
+            token.transfer(accounts[i], value);
         }
     }
 
     function setCount(uint inCounter) public onlyOwner() {
         counter = inCounter;
-    }
-
-    function setValue(uint inValue) public onlyOwner() {
-        value = inValue;
     }
 
     function setToken(address tokenAddress) public onlyOwner() {

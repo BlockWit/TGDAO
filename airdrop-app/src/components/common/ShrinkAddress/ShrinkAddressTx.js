@@ -19,7 +19,7 @@ const ShrinkAddressTx = ({tx}) => {
     }
 
     return (
-        <a href={'https://' + networkName + '.etherscan.io/tx/' + tx} target={"_blank"}
+        <a href={'https://' + networkName + 'bscscan.com/tx/' + tx} target={"_blank"}
            className={classes.link}
         >{visibleAddress}</a>
     );
