@@ -142,10 +142,12 @@ const AirDropPage = () => {
             break;
           }
 
+          let localBalance = BigNumber.from(balance);
+          //localBalance = BigNumber.from(parseInt(balance.toString().substring(0, balance.length - 9)));
+
           airDrops.push({
             address: getAddress(address),
-            balance: BigNumber.from(balance)
-            //balance: BigNumber.from(parseInt(balance.toString().substring(0, balance.length - 10)))
+            balance: localBalance
           });
         }
 
