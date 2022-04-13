@@ -22,8 +22,6 @@ contract StakingProgram is RecoverableFunds {
 
     address public fineWallet;
 
-    uint public summaryFine = 0;
-
     bool public paused = false;
 
     struct StakeType {
@@ -280,7 +278,6 @@ contract StakingProgram is RecoverableFunds {
 
         if(staker.amountAfter[stakeIndex] < staker.amount[stakeIndex]) {
             uint fine = staker.amount[stakeIndex] - staker.amountAfter[stakeIndex];
-            summaryFine += fine;
             require(token.transfer(fineWallet, fine), "Can't transfer reward");
         }
 
