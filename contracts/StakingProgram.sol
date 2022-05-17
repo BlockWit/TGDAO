@@ -114,7 +114,7 @@ contract StakingProgram is RecoverableFunds {
     }
 
     function copyFromAnotherStakingProgram(address addressFrom, uint count) public onlyOwner {
-        StakingProgram anotherStakingProgram = StakingProgram(addressFrom);
+        TGDAOStaking anotherStakingProgram = TGDAOStaking(addressFrom);
         uint[] memory uintValues = new uint[](3);
         uintValues[0] = anotherStakingProgram.stakersAddressesCount();
         require(uintValues[0] > copyCounter, "Already copied");
